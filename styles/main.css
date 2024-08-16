@@ -63,3 +63,13 @@ img.next-image {
 .nav-line .nav-link {
   color: #69778c;
 }
+
+.prose {
+    max-width: 80ch !important;
+    margin: 0 auto !important;
+}
+.nx-container {
+    max-width: 65rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+}
