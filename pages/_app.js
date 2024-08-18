@@ -3,7 +3,7 @@ import Head from 'next/head'
 
 import '../styles/main.css'
 
-export default function Nextra({ Component, pageProps }) {
+export default function Nextra({Component, pageProps}) {
   return (
     <>
       <Head>
@@ -11,7 +11,7 @@ export default function Nextra({ Component, pageProps }) {
           rel="alternate"
           type="application/rss+xml"
           title="RSS"
-          href="/feed.xml"
+          href={`${process.env.NODE_ENV === 'production' ? '/shawndeng_blogs' : ''}/feed.xml`}
         />
         <link
           rel="preload"
