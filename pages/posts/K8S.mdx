@@ -1035,3 +1035,604 @@ spec:
             - -c
             - date; echo Hello from the Kubernetes cluster
           restartPolicy: OnFailure
+
+
+## Kubernetes 调度（Scheduling）
+
+### Kubernetes 调度概述
+
+Kubernetes 调度器负责决定将 Pod 放置在哪个节点上运行。调度决策基于多种因素，包括资源需求、硬件/软件/策略约束、亲和性/反亲和性规范、数据局部性等。本文总结了 Kubernetes 中的各种调度机制。
+
+### 常用 kubectl scheduling 命令汇总
+
+| 命令                                                         | 描述                               |
+| ------------------------------------------------------------ | ---------------------------------- |
+| `kubectl get nodes`                                          | 列出所有节点                       |
+| `kubectl get nodes --show-labels`                            | 显示节点及其标签                   |
+| `kubectl describe node <node-name>`                          | 查看节点详细信息，包括污点         |
+| `kubectl label nodes <node-name> <key>=<value>`              | 为节点添加标签                     |
+| `kubectl label nodes <node-name> <key>-`                     | 删除节点标签                       |
+| `kubectl taint nodes <node-name> <key>=<value>:<effect>`     | 为节点添加污点                     |
+| `kubectl taint nodes <node-name> <key>: nodes <node-name> <key>:<effect>-` | 删除节点污点                       |
+| `kubectl cordon <node-name>`                                 | 标记节点为不可调度                 |
+| `kubectl uncordon <node-name>`                               | 标记节点为可调度                   |
+| `kubectl drain <node-name>`                                  | 驱逐节点上的 Pod                   |
+| `kubectl drain <node-name> --ignore-daemonsets`              | 驱逐节点上的 Pod（忽略 DaemonSet） |
+| `kubectl get pods -o wide`                                   | 查看 Pod 及其所在节点              |
+| `kubectl get pods --field-selector spec.nodeName=<node-name>` | 查看特定节点上的 Pod               |
+
+### 节点选择器 (Node Selector)
+
+节点选择器是最简单的约束形式，允许 Pod 指定节点标签作为调度条件。
+
+#### 使用方法
+
+在 Pod 规范中添加 `nodeSelector` 字段：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeSelector:
+    disktype: ssd
+```
+
+#### 相关命令
+
+```bash
+# 为节点添加标签
+kubectl label nodes <node-name> disktype=ssd
+
+# 查看节点标签
+kubectl get nodes --show-labels
+
+# 删除节点标签
+kubectl label nodes <node-name> disktype-
+```
+
+#### 应用案例：基于硬件类型的工作负载分配
+
+**背景**：在混合集群中，某些节点配备了 SSD 存储，而其他节点使用普通硬盘。数据库工作负载需要更快的 I/O 性能。
+
+**解决方案**：
+1. 为节点添加硬件类型标签：
+
+```bash
+# 为具有 SSD 的节点添加标签
+kubectl label nodes node1 node2 storage=ssd
+```
+
+2. 在数据库 Pod 规范中使用 nodeSelector：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.4
+      nodeSelector:
+        storage: ssd
+```
+
+#### 应用案例：开发/测试/生产环境隔离
+
+**背景**：单个集群用于托管不同环境的应用程序，需要确保环境之间的工作负载隔离。
+
+**解决方案**：
+1. 为节点添加环境标签：
+
+```bash
+kubectl label nodes node1 node2 environment=production
+kubectl label nodes node3 node4 environment=staging
+kubectl label nodes node5 node6 environment=development
+```
+
+2. 在部署中使用相应的 nodeSelector：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-production
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+      environment: production
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: frontend
+        environment: production
+    spec:
+      containers:
+      - name: frontend
+        image: myapp/frontend:stable
+      nodeSelector:
+        environment: production
+```
+
+### 亲和性和反亲和性 (Affinity & Anti-Affinity)
+
+比节点选择器更强大的调度机制，提供更丰富的表达能力。
+
+#### 节点亲和性 (Node Affinity)
+
+支持两种类型：
+- `requiredDuringSchedulingIgnoredDuringExecution`：硬性要求
+- `preferredDuringSchedulingIgnoredDuringExecution`：软性偏好
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/e2e-az-name
+            operator: In
+            values:
+            - e2e-az1
+            - e2e-az2
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: another-node-label-key
+            operator: In
+            values:
+            - another-node-label-value
+  containers:
+  - name: with-node-affinity
+    image: k8s.gcr.io/pause:2.0
+```
+
+#### Pod 亲和性和反亲和性 (Pod Affinity & Anti-Affinity)
+
+允许基于已经在节点上运行的 Pod 的标签来约束 Pod 的调度。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:- key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: topology.kubernetes.io/zone
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security
+              operator: In
+              values:
+              - S2
+          topologyKey: topology.kubernetes.io/zone
+  containers:
+  - name: with-pod-affinity
+    image: k8s.gcr.io/pause:2.0
+```
+
+#### 应用案例：高可用性部署 - 跨可用区分布
+
+**背景**：确保应用程序的多个副本分布在不同的可用区，以提高容错能力。
+
+**解决方案**：使用 Pod 反亲和性确保 Pod 分布在不同可用区：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - web
+            topologyKey: topology.kubernetes.io/zone
+      containers:
+      - name: nginx
+        image: nginx:latest
+```
+
+#### 应用案例：数据局部性 - 将应用与其数据放在一起
+
+**背景**：应用程序需要访问缓存服务，为了减少网络延迟，希望将应用程序部署在与缓存服务相同的节点上。
+
+**解决方案**：使用 Pod 亲和性将应用程序调度到运行缓存服务的节点上：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - cache
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: web-app
+        image: myapp/web:v1
+```
+
+### 污点和容忍 (Taints & Tolerations)
+
+污点是应用于节点的，允许节点排斥一组 Pod。容忍是应用于 Pod 的，允许 Pod 调度到带有匹配污点的节点上。
+
+#### 添加污点
+
+```bash
+# 为节点添加污点
+kubectl taint nodes node1 key=value:NoSchedule
+
+# 删除污点
+kubectl taint nodes node1 key:NoSchedule-
+```
+
+污点效果有三种：
+- `NoSchedule`：不允许调度新 Pod（除非有容忍）
+- `PreferNoSchedule`：尽量避免调度新 Pod
+- `NoExecute`：驱逐没有对应容忍的现有 Pod
+
+#### Pod 容忍设置
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  tolerations:
+  - key: "key"
+    operator: "Equal"
+    value: "value"
+    effect: "NoSchedule"
+```
+
+#### 应用案例：专用节点 - 只运行特定工作负载
+
+**背景**：集群中有一些高性能节点，仅用于运行特定的资源密集型应用程序。
+
+**解决方案**：
+1. 为专用节点添加污点：
+
+```bash
+kubectl taint nodes node1 node2 dedicated=ml:NoSchedule
+```
+
+2. 在机器学习工作负载中添加相应的容忍：
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ml-training
+spec:
+  template:
+    spec:
+      containers:
+      - name: ml-container
+        image: ml-training:v1
+        resources:
+          limits:
+            cpu: "8"
+            memory: "32Gi"
+      tolerations:
+      - key: "dedicated"
+        operator: "Equal"
+        value: "ml"
+        effect: "NoSchedule"
+      restartPolicy: Never
+```
+
+#### 应用案例：节点维护 - 优雅驱逐
+
+**背景**：需要对节点进行维护，希望新的 Pod 不再调度到该节点，并且现有 Pod 在一定时间后被驱逐。
+
+**解决方案**：
+1. 为节点添加 NoExecute 污点，并设置宽限期：
+
+```bash
+kubectl taint nodes node1 maintenance=planned:NoExecute --overwrite=true
+```
+
+2. 为关键应用程序添加容忍，允许它们在维护期间继续运行一段时间：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  
+kind: Deployment
+metadata:
+  name: critical-service
+spec:
+  name: critical-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: critical
+  template:
+    metadata:
+      labels:
+        app: critical
+    spec:
+      containers:
+      - name: service
+        image: myservice:v1
+      tolerations:
+      - key: "maintenance"
+        operator: "Equal"
+        value: "planned"
+        effect: "NoExecute"
+        tolerationSeconds: 3600  # 给应用 1 小时的时间进行优雅迁移
+```
+
+### 节点封锁 (Cordoning)
+
+临时禁止 Pod 调度到特定节点，通常用于节点维护。
+
+```bash
+# 标记节点为不可调度
+kubectl cordon <node-name>
+
+# 恢复节点为可调度
+kubectl uncordon <node-name>
+
+# 驱逐节点上的 Pod（安全地将工作负载迁移到其他节点）
+kubectl drain <node-name> --ignore-daemonsets
+```
+
+#### 应用案例：节点系统升级
+
+**背景**：需要对节点进行内核升级，需要确保在升级过程中不会有新的 Pod 调度到该节点。
+
+**解决方案**：
+1. 标记节点为不可调度（cordon）：
+
+```bash
+kubectl cordon node1
+```
+
+2. 验证节点状态：
+
+```bash
+kubectl get nodes
+# 输出中 node1 的 STATUS 应显示为 "Ready,SchedulingDisabled"
+```
+
+3. 执行系统升级操作。
+4. 升级完成后，恢复节点为可调度状态：
+
+```bash
+kubectl uncordon node1
+```
+
+#### 应用案例：节点维护 - 安全迁移工作负载
+
+**背景**：需要对节点进行硬件维护，需要将现有工作负载安全地迁移到其他节点。
+
+**解决方案**：
+1. 使用 drain 命令安全地驱逐节点上的 Pod：
+
+```bash
+# 驱逐节点上的所有 Pod（忽略 DaemonSet）
+kubectl drain node1 --ignore-daemonsets
+
+# 如果有使用 emptyDir 的 Pod，需要添加 --delete-emptydir-data 标志
+kubectl drain node1 --ignore-daemonsets --delete-emptydir-data
+```
+
+2. 执行维护操作。
+3. 维护完成后，恢复节点：
+
+```bash
+kubectl uncordon node1
+```
+
+### 手动调度 Pod
+
+在不使用默认调度器的情况下，可以手动指定 Pod 运行的节点。
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  nodeName: <node-name>  # 直接指定节点名称
+  containers:
+  - name: nginx
+    image: nginx
+```
+
+#### 应用案例：调试特定节点问题
+
+**背景**：特定节点上出现了问题，需要部署一个调试 Pod 到该节点进行诊断。
+
+**解决方案**：使用 `nodeName` 字段直接指定节点：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-pod
+spec:
+  nodeName: problem-node  # 直接指定有问题的节点
+  containers:
+  - name: debug-container
+    image: busybox
+    command: ["sleep", "3600"]
+```
+
+### 综合应用案例：多层应用程序的最佳部署策略
+
+**背景**：部署一个由前端、API 服务和数据库组成的三层应用程序，需要考虑性能、可用性和资源利用率。
+
+**解决方案**：
+
+1. 为数据库 Pod 使用节点选择器，确保它们运行在 SSD 节点上：
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: "postgres"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      nodeSelector:
+        storage: ssd
+      containers:
+      - name: postgres
+        image: postgres:13
+```
+
+2. 为 API 服务使用 Pod 反亲和性，确保它们分布在不同节点上以提高可用性：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - api
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: api
+        image: myapp/api:v1
+```
+
+3. 为前端使用 Pod 亲和性，使其靠近 API 服务以减少延迟：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - api
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: frontend
+        image: myapp/frontend:v1
+```
+
+通过这种综合策略，可以确保：
+- 数据库运行在高性能存储节点上
+- API 服务分布在多个节点上提高可用性
+- 前端服务尽可能靠近 API 服务以减少延迟
