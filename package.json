@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next",
     "build": "node ./scripts/gen-rss.js && next build",
+    "test:content": "node ./scripts/validate-content.js",
     "start": "next start"
   },
   "dependencies": {
