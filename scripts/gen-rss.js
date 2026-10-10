@@ -26,8 +26,8 @@ async function generate() {
         url: '/posts/' + name.replace(/\.mdx?/, ''),
         date: frontmatter.data.date,
         description: frontmatter.data.description,
-        categories: frontmatter.data.tag.split(', '),
-        author: frontmatter.data.author
+        categories: String(frontmatter.data.tag || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+        author: frontmatter.data.author || 'Shawn Deng'
       })
     })
   )
