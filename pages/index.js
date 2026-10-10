@@ -12,7 +12,7 @@ export async function getStaticProps() {
   const postsDir = path.join(process.cwd(), 'pages', 'posts')
   const posts = fs
     .readdirSync(postsDir)
-    .filter((file) => /\.mdx?$/.test(file))
+    .filter((file) => /\.mdx?$/.test(file) && file !== 'index.mdx')
     .map((file) => {
       const source = fs.readFileSync(path.join(postsDir, file), 'utf8')
       const parsed = matter(source)
@@ -32,6 +32,7 @@ export async function getStaticProps() {
 }
 
 export default function Home({posts}) {
+  const base = process.env.NODE_ENV === 'production' ? '/shawndeng_blogs' : ''
   return (
     <>
       <Head>
@@ -49,7 +50,7 @@ export default function Home({posts}) {
           <nav className="hero-links" aria-label="站点导航">
             <Link href="/posts">全部文章</Link>
             <a href="https://github.com/ShawnDen-coder">GitHub</a>
-            <a href="/feed.xml">RSS</a>
+            <a href={`${base}/feed.xml`}>RSS</a>
           </nav>
         </header>
 
