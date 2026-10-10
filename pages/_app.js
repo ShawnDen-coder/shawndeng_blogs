@@ -22,19 +22,7 @@ export default function Nextra({Component, pageProps}) {
         <meta property="og:description" content={description} />
         <meta property="og:url" content={canonical} />
         <meta property="og:image" content="https://shawnden-coder.github.io/shawndeng_blogs/og.svg" />
-        <link
-          rel="alternate"
-          type="application/rss+xml"
-          title="RSS"
-          href={`${process.env.NODE_ENV === 'production' ? '/shawndeng_blogs' : ''}/feed.xml`}
-        />
-        <link
-          rel="preload"
-          href="/fonts/Inter-roman.latin.var.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
+        <link rel="alternate" type="application/rss+xml" title="RSS" href={`${base}/feed.xml`} />
       </Head>
       <Component {...pageProps} />
     </>
