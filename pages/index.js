@@ -3,6 +3,7 @@ import Link from 'next/link'
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
+import {useEffect, useState} from 'react'
 
 function readingMinutes(content) {
   return Math.max(1, Math.round(content.trim().split(/\s+/).length / 220))
@@ -32,6 +33,12 @@ export async function getStaticProps() {
 }
 
 export default function Home({posts}) {
+  const [theme, setTheme] = useState('system')
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
+
   return (
     <>
       <Head>
@@ -50,6 +57,9 @@ export default function Home({posts}) {
             <Link href="/posts">全部文章</Link>
             <a href="https://github.com/ShawnDen-coder">GitHub</a>
             <a href="/feed.xml">RSS</a>
+            <button className="theme-toggle" type="button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+              {theme === 'dark' ? '浅色模式' : '深色模式'}
+            </button>
           </nav>
         </header>
 
