@@ -7,7 +7,8 @@ async function generate() {
   const feed = new RSS({
     title: 'Shawn Deng',
     site_url: 'https://shawnden-coder.github.io/shawndeng_blogs',
-    feed_url: 'https://shawnden-coder.github.io/shawndeng_blogs/feed.xml'
+    feed_url: 'https://shawnden-coder.github.io/shawndeng_blogs/feed.xml',
+    language: 'zh-CN'
   })
 
   const posts = await fs.readdir(path.join(__dirname, '..', 'pages', 'posts'))
@@ -23,10 +24,10 @@ async function generate() {
 
       allPosts.push({
         title: frontmatter.data.title,
-        url: '/posts/' + name.replace(/\.mdx?/, ''),
+        url: 'https://shawnden-coder.github.io/shawndeng_blogs/posts/' + name.replace(/\.mdx?/, ''),
         date: frontmatter.data.date,
         description: frontmatter.data.description,
-        categories: String(frontmatter.data.tag || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+        categories: String(frontmatter.data.tags || frontmatter.data.tag || '').replace(/[\[\]]/g, '').split(',').map((tag) => tag.trim()).filter(Boolean),
         author: frontmatter.data.author || 'Shawn Deng'
       })
     })
