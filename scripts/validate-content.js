@@ -1,6 +1,12 @@
 const fs = require('fs')
 const path = require('path')
 const matter = require('gray-matter')
+const assert = require('assert')
+const {normalizeTags} = require('../components/post-meta-utils')
+
+assert.deepStrictEqual(normalizeTags(['docker'], undefined), ['docker'])
+assert.deepStrictEqual(normalizeTags(undefined, 'docker'), ['docker'])
+assert.deepStrictEqual(normalizeTags(undefined, undefined), [])
 
 const dir = path.join(__dirname, '..', 'pages', 'posts')
 const files = fs.readdirSync(dir).filter((file) => file.endsWith('.mdx') && file !== 'index.mdx')
