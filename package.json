@@ -1,9 +1,11 @@
 {
   "private": true,
+  "engines": {"node": ">=20 <21"},
+  "packageManager": "yarn@1.22.22",
   "license": "MIT",
   "scripts": {
     "dev": "next",
-    "build": "node ./scripts/gen-rss.js && next build",
+    "build": "node ./scripts/validate-content.js && node ./scripts/gen-rss.js && next build && node ./scripts/validate-build.js",
     "test:content": "node ./scripts/validate-content.js",
     "start": "next start"
   },

@@ -4,11 +4,11 @@ export default function Document() {
   const meta = {
     title: 'Shawn Deng · AI Agent / DevOps / Homelab',
     description: 'Shawn Deng 的工程实践：DevOps、Homelab、Kubernetes 与 AI Agent。',
-    image: 'https://shawnden-coder.github.io/shawndeng_blogs/images/image-20240710000333931.png'
+    image: 'https://shawnden-coder.github.io/shawndeng_blogs/og.svg'
   }
 
   return (
-    <Html lang="en">
+    <Html lang="zh-CN">
       <Head>
         <meta name="robots" content="follow, index" />
         <meta name="description" content={meta.description} />
