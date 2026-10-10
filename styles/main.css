@@ -2,14 +2,14 @@
   font-family: 'Inter var';
   font-style: normal;
   font-weight: 100 900;
-  font-display: block;
+  font-display: swap;
   src: url(/fonts/Inter-roman.latin.var.woff2) format('woff2');
 }
 @font-face {
   font-family: 'Inter var';
   font-style: italic;
   font-weight: 100 900;
-  font-display: block;
+  font-display: swap;
   src: url(/fonts/Inter-italic.latin.var.woff2) format('woff2');
   font-named-instance: 'Italic';
 }
@@ -102,6 +102,7 @@ img.next-image {
 .hero-copy { color: var(--muted); line-height: 1.75; max-width: 42rem; }
 .hero-links { display: flex; gap: 1.25rem; margin-top: 2rem; font: 600 .82rem ui-monospace, SFMono-Regular, Menlo, monospace; }
 .hero-links a { color: var(--ink); text-decoration: underline; text-underline-offset: .3em; }
+.theme-toggle { background: transparent; border: 0; color: var(--muted); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; text-underline-offset: .3em; }
 .latest-section { border-top: 1px solid var(--line); padding-top: 2rem; }
 .section-heading h2 { font-size: 2rem; letter-spacing: -.04em; margin: 0 0 1.25rem; }
 .post-list { border-top: 1px solid var(--line); }
@@ -120,6 +121,9 @@ main article {
 @media (prefers-color-scheme: dark) {
   :root { --paper: #171816; --ink: #e8e8e3; --muted: #a4aaad; --line: #3a3c39; --accent: #fb923c; --surface: #222421; }
 }
+
+:root[data-theme='light'] { --paper: #fafaf8; --ink: #20211f; --muted: #69778c; --line: #d9d9d2; --accent: #9a3412; --surface: #f1f1ec; }
+:root[data-theme='dark'] { --paper: #171816; --ink: #e8e8e3; --muted: #a4aaad; --line: #3a3c39; --accent: #fb923c; --surface: #222421; }
 
 @media (max-width: 640px) {
   .home-shell { padding-top: 2.5rem; }
