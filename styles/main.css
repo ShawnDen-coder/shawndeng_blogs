@@ -23,7 +23,9 @@ body {
     'cv03' 1, 'cv04' 1;
   font-variation-settings: 'wght' 450;
   font-variant: common-ligatures contextual;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.018em;
+  background: #fafaf8;
+  color: #20211f;
 }
 b,
 strong,
@@ -57,7 +59,9 @@ img.next-image {
 }
 
 .prose a {
-  color: #0074de;
+  color: #9a3412;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
 .nav-line .nav-link {
@@ -69,7 +73,16 @@ img.next-image {
     margin: 0 auto !important;
 }
 .nx-container {
-    max-width: 65rem !important;
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
+    max-width: 68rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+main article {
+  max-width: 68rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #171816; color: #e8e8e3; }
+  .prose a { color: #fb923c; }
 }
