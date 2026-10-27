@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { sceneSchedulesAnimation } from './appearance'
 import { OceanRenderer } from './renderer'
 
 export function OceanScene() {
@@ -20,6 +21,7 @@ export function OceanScene() {
     const updateMotion = () => {
       if (motion.matches) {
         pointerX = pointerY = targetX = targetY = 0
+        ripple = undefined
         draw()
       }
       schedule()
@@ -71,13 +73,13 @@ export function OceanScene() {
     function schedule() {
       cancelAnimationFrame(raf)
       last = lastDraw = frameBudget = 0
-      if (
-        !disposed &&
-        captureTime === undefined &&
-        visible &&
-        !document.hidden &&
-        !motion.matches
-      )
+      if (sceneSchedulesAnimation({
+        disposed,
+        capturing: captureTime !== undefined,
+        visible,
+        hidden: document.hidden,
+        reduced: motion.matches
+      }))
         raf = requestAnimationFrame(frame)
     }
     const updateReadingAreas = () => {
@@ -195,9 +197,9 @@ export function OceanScene() {
         >
           <g
             transform="translate(570 220) rotate(-12)"
-            stroke="var(--ui-text-primary)"
+            stroke="var(--ui-text-muted)"
             strokeWidth="1.4"
-            opacity=".58"
+            opacity=".4"
           >
             <path d="M-28-48 Q-125-60-265-100 Q-235-18-120 20 Q-55 52-20 56 L0 190 8 55 Q70 45 133 10 Q215-38 245-92 Q122-45 25-48 L20-68 11-75 9-51-9-51-12-75-22-68Z" />
             <path

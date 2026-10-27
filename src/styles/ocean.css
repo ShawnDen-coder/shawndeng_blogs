@@ -37,6 +37,10 @@
   position: relative;
   z-index: 1;
 }
+@keyframes ocean-intro-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 .ocean-intro h1 {
   display: flex;
   flex-wrap: wrap;
@@ -47,6 +51,7 @@
   font-weight: 400;
   letter-spacing: 0;
   margin: 0 0 16px;
+  animation: ocean-intro-in 280ms ease both;
 }
 .ocean-name {
   color: var(--ui-text-muted);
@@ -57,6 +62,7 @@
   max-width: 700px;
   font-size: 16px;
   line-height: 1.95;
+  animation: ocean-intro-in 280ms ease 120ms both;
 }
 .ocean-copy p {
   margin: 0 0 8px;
@@ -78,6 +84,7 @@
   gap: 12px 28px;
   margin-top: 20px;
   font-size: 13px;
+  animation: ocean-intro-in 280ms ease 120ms both;
 }
 .ocean-links a {
   padding-block: 6px;
@@ -118,8 +125,12 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .ocean-intro h1,
+  .ocean-copy,
+  .ocean-links,
   .ocean-copy a,
   .ocean-links a {
+    animation: none;
     transition: none;
   }
 }
