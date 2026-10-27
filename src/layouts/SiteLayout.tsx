@@ -1,6 +1,7 @@
 import { Link, useMatchRoute } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Arrow } from '../components/Arrow'
+import { ThemeSelect } from '../components/ThemeSelect'
 import { assetUrl, site } from '../lib/site'
 
 const navigation = [
@@ -18,8 +19,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     <div
       className={
         isHome
-          ? 'site-shell site-shell--ocean'
-          : isLab ? 'site-shell site-shell--lab' : 'site-shell mx-auto w-full max-w-[768px] px-6 sm:px-8'
+          ? 'site-shell site-shell--home'
+          : isLab ? 'site-shell site-shell--lab' : 'site-shell'
       }
     >
       <a
@@ -34,11 +35,12 @@ export function SiteLayout({ children }: { children: ReactNode }) {
       >
         跳到正文
       </a>
-      <header className="site-header flex flex-wrap items-center justify-between gap-5">
+      <header className="site-header">
         <Link to="/" className="wordmark" aria-label="Shawn Deng 首页">
           shawn.
         </Link>
-        <nav aria-label="主导航" className="flex items-center gap-6 sm:gap-8">
+        <nav aria-label="主导航">
+          <Link to="/" activeOptions={{ exact: true }} activeProps={{ 'aria-current': 'page' }}>首页</Link>
           {navigation.map((item) => (
             <Link
               key={item.to}
@@ -50,6 +52,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
+        <ThemeSelect />
       </header>
       <main id="main" tabIndex={-1}>
         {children}

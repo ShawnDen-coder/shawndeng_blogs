@@ -4,7 +4,7 @@ import { buildMotionFrames, DEFAULT_MOTION } from './motion-curves'
 import type { LabFrame, MotionSettings } from './motion-curves'
 import './motion-lab.css'
 
-const controls: Array<{ key: keyof MotionSettings; label: string; min: number; max: number; step: number; unit: string }> = [
+const controls: Array<{ key: Exclude<keyof MotionSettings, 'activity'>; label: string; min: number; max: number; step: number; unit: string }> = [
   { key: 'period', label: '拍翼周期', min: 2.8, max: 5, step: .1, unit: 's' },
   { key: 'hold', label: '顶端滑行', min: .15, max: 1.2, step: .05, unit: 's' },
   { key: 'amplitude', label: '翼面幅度', min: .35, max: .9, step: .01, unit: 'rad' },
@@ -15,22 +15,22 @@ const controls: Array<{ key: keyof MotionSettings; label: string; min: number; m
 const degrees = (rad: number) => rad * 180 / Math.PI
 const tracks: Array<{ title: string; unit: string; range: [number, number]; lines: Array<{ key: 'root' | 'tip' | 'twist' | 'speed' | 'bank' | 'thrust' | 'tailSide' | 'tailLift'; label: string; color: string; dashed?: boolean; value: (f: LabFrame) => number }> }> = [
   { title: '拍翼与跟随', unit: '°', range: [-90, 90], lines: [
-    { key: 'root', label: '内翼弯曲', color: '#7cbedb', value: f => degrees(f.root) },
-    { key: 'tip', label: '翼尖卷曲', color: '#ddd9cf', dashed: true, value: f => degrees(f.tip) }
+    { key: 'root', label: '内翼弯曲', color: 'light-dark(#226a88, #7cbedb)', value: f => degrees(f.root) },
+    { key: 'tip', label: '翼尖卷曲', color: 'var(--ui-text-primary)', dashed: true, value: f => degrees(f.tip) }
   ] },
   { title: '后缘与转弯', unit: '°', range: [-35, 35], lines: [
-    { key: 'twist', label: '后缘扭转', color: '#7cbedb', value: f => degrees(f.twist) },
-    { key: 'bank', label: '身体侧倾', color: '#ddd9cf', dashed: true, value: f => degrees(f.bank) }
+    { key: 'twist', label: '后缘扭转', color: 'light-dark(#226a88, #7cbedb)', value: f => degrees(f.twist) },
+    { key: 'bank', label: '身体侧倾', color: 'var(--ui-text-primary)', dashed: true, value: f => degrees(f.bank) }
   ] },
   { title: '尾尖延迟跟随', unit: '模型长度', range: [-.2, .2], lines: [
-    { key: 'tailSide', label: '侧向弯曲', color: '#7cbedb', value: f => f.tailSide },
-    { key: 'tailLift', label: '轻微起伏', color: '#ddd9cf', dashed: true, value: f => f.tailLift }
+    { key: 'tailSide', label: '侧向弯曲', color: 'light-dark(#226a88, #7cbedb)', value: f => f.tailSide },
+    { key: 'tailLift', label: '轻微起伏', color: 'var(--ui-text-primary)', dashed: true, value: f => f.tailLift }
   ] },
   { title: '拍翼产生的推进', unit: '相对值', range: [0, 6], lines: [
-    { key: 'thrust', label: '视觉推力', color: '#7cbedb', value: f => f.thrust }
+    { key: 'thrust', label: '视觉推力', color: 'light-dark(#226a88, #7cbedb)', value: f => f.thrust }
   ] },
   { title: '推进后的速度', unit: '场景短边/s', range: [0, .16], lines: [
-    { key: 'speed', label: '积分速度', color: '#7cbedb', value: f => f.speed }
+    { key: 'speed', label: '积分速度', color: 'light-dark(#226a88, #7cbedb)', value: f => f.speed }
   ] }
 ]
 
@@ -42,6 +42,7 @@ export function MantaMotionLab() {
   const [follow, setFollow] = useState(true)
   const [size, setSize] = useState({ width: 900, height: 430 })
   const [canvasError, setCanvasError] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   const canvas = useRef<HTMLCanvasElement>(null)
   const renderer = useRef<OceanRenderer | null>(null)
   const timeRef = useRef(0)
@@ -59,6 +60,14 @@ export function MantaMotionLab() {
     const ctx = element?.getContext('2d')
     if (!element || !ctx) { setCanvasError(true); return }
     renderer.current = new OceanRenderer(ctx)
+    const syncTheme = () => {
+      const next = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'
+      renderer.current?.setTheme(next)
+      setTheme(next)
+    }
+    const themeObserver = new MutationObserver(syncTheme)
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    syncTheme()
     const resize = () => {
       const { width, height } = element.getBoundingClientRect()
       if (width && height) setSize({ width, height })
@@ -66,7 +75,7 @@ export function MantaMotionLab() {
     const observer = new ResizeObserver(resize)
     observer.observe(element)
     resize()
-    return () => { observer.disconnect(); renderer.current = null }
+    return () => { observer.disconnect(); themeObserver.disconnect(); renderer.current = null }
   }, [])
   useEffect(() => {
     renderer.current?.resize(size.width, size.height, window.devicePixelRatio || 1)
@@ -81,7 +90,7 @@ export function MantaMotionLab() {
     draw()
     document.fonts.ready.then(draw)
     return () => { disposed = true }
-  }, [current, shownTime, follow, size])
+  }, [current, shownTime, follow, size, theme])
   useEffect(() => {
     if (!playing) return
     let raf = 0, previous = 0
@@ -139,10 +148,10 @@ export function MantaMotionLab() {
                   const rect = event.currentTarget.getBoundingClientRect()
                   seek(((event.clientX - rect.left) / rect.width * 800 - 34) / 760 * duration)
                 }}>
-                  {[track.range[0], 0, track.range[1]].filter((v, i, all) => all.indexOf(v) === i).map(value => <g key={value}><path d={`M34 ${y(value)}H794`} stroke="#353535" strokeWidth=".6" /><text x="0" y={y(value) + 3} fill="#9a9a9a" fontSize="9">{value}</text></g>)}
-                  {track.lines.map(line => <path key={line.key} d={frames.filter((_, i) => i % 8 === 0).map((f, i) => `${i ? 'L' : 'M'}${34 + f.time / duration * 760},${y(line.value(f))}`).join(' ')} stroke={line.color} strokeWidth="1.6" strokeDasharray={line.dashed ? '5 4' : undefined} fill="none" />)}
-                  <path d={`M${34 + shownTime / duration * 760} 5V87`} stroke="#eee" strokeWidth="1" />
-                  {[0, 1, 2, 3, 4].map(n => <text key={n} x={34 + n / 4 * 760} y="101" textAnchor={n === 4 ? 'end' : 'start'} fill="#9a9a9a" fontSize="9">{(duration * n / 4).toFixed(1)} s</text>)}
+                  {[track.range[0], 0, track.range[1]].filter((v, i, all) => all.indexOf(v) === i).map(value => <g key={value}><path d={`M34 ${y(value)}H794`} stroke="var(--ui-border)" strokeWidth=".6" /><text x="0" y={y(value) + 3} fill="var(--ui-text-muted)" fontSize="9">{value}</text></g>)}
+                  {track.lines.map(line => <path key={line.key} d={frames.filter((_, i) => i % 8 === 0).map((f, i) => `${i ? 'L' : 'M'}${(34 + f.time / duration * 760).toFixed(3)},${y(line.value(f)).toFixed(3)}`).join(' ')} stroke={line.color} strokeWidth="1.6" strokeDasharray={line.dashed ? '5 4' : undefined} fill="none" />)}
+                  <path d={`M${34 + shownTime / duration * 760} 5V87`} stroke="var(--ui-text-primary)" strokeWidth="1" />
+                  {[0, 1, 2, 3, 4].map(n => <text key={n} x={34 + n / 4 * 760} y="101" textAnchor={n === 4 ? 'end' : 'start'} fill="var(--ui-text-muted)" fontSize="9">{(duration * n / 4).toFixed(1)} s</text>)}
                 </svg>
               </div>
             })}

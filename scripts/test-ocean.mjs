@@ -83,7 +83,8 @@ try {
   assert(Math.abs(tailPoint(1, settings.period * 4, settings).x) < 1e-6, 'tail settles after the turn')
   console.log('Curve joins, dual-stroke thrust, flexible span, stable body, seeking and passive tail passed')
 
-  for (const [width, height] of [[1440, 510], [768, 410], [390, 310]]) {
+  // Cover both the compact laboratory and the full-viewport homepage.
+  for (const [width, height] of [[1440, 510], [768, 410], [390, 310], [2048, 1015], [768, 1024], [390, 844]]) {
     for (let seed = 0; seed < 24; seed++) {
       const world = new MantaWorld(seed)
       for (let frame = 1; frame <= 180 * 30; frame++) {
@@ -117,6 +118,55 @@ try {
   assert.notEqual(world.animals[0].rig.time, world.animals[1].rig.time)
   assert.notEqual(world.animals[0].rig.settings.period, world.animals[1].rig.settings.period)
   console.log('Three independent calibrated rigs and passive tail histories passed')
+
+  // A settled glide holds an open wing and cannot keep driving the animal forward.
+  const resting = { ...settings, activity: 0 }
+  const rest = curvedSurface(.85, .5, 0, resting, 0)
+  for (let t = 0; t < settings.period * 2; t += .1) {
+    assert.equal(strokeCurve(t, resting).thrust, 0)
+    assert.equal(Math.abs(strokeCurve(t, resting).velocity), 0)
+    assert.deepEqual(curvedSurface(.85, .5, t, resting, 0), rest)
+  }
+  const glideWorld = new MantaWorld(17)
+  for (const fish of glideWorld.animals) {
+    fish.gait = 'glide'; fish.nextGait = Infinity; fish.rig.settings.activity = 0
+  }
+  for (let n = 1; n <= 300; n++) {
+    const speeds = glideWorld.animals.map(fish => fish.speed)
+    glideWorld.advance(n / 60, 1440, 900).forEach((fish, i) => {
+      assert(fish.speed < speeds[i], 'a settled glide loses speed to drag')
+    })
+  }
+  const rhythms = new MantaWorld(62), stages = [new Set(), new Set(), new Set()]
+  for (let n = 1; n <= 60 * 90; n++) {
+    const before = rhythms.animals.map(fish => ({ phase: fish.rig.phaseTime,
+      activity: fish.rig.settings.activity, angle: strokeCurve(fish.rig.phaseTime, fish.rig.settings).angle }))
+    rhythms.advance(n / 60, 1440, 900).forEach((fish, i) => {
+      stages[i].add(fish.gait)
+      assert(fish.rig.phaseTime > before[i].phase, 'changing gait cannot reset or reverse wing phase')
+      assert(Math.abs(fish.rig.settings.activity - before[i].activity) <= .021)
+      assert(Math.abs(strokeCurve(fish.rig.phaseTime, fish.rig.settings).angle - before[i].angle) < .05,
+        'gait transitions must not snap the wing')
+      assert(Number.isFinite(fish.rig.headingHistory.at(-1).strokeVelocity))
+    })
+  }
+  stages.forEach(seen => assert.equal(seen.size, 3, 'each animal has all three rhythms'))
+  const baseline = new MantaWorld(8), disturbed = new MantaWorld(8)
+  disturbed.disturb(.70, .60)
+  baseline.advance(2, 1440, 900); disturbed.advance(2, 1440, 900)
+  assert(Math.abs(baseline.animals[0].heading - disturbed.animals[0].heading) > .01,
+    'a nearby disturbance should produce a restrained turn')
+  assert.equal(baseline.animals[2].heading, disturbed.animals[2].heading,
+    'a distant animal should not chase the same interaction')
+  const pose = rhythms.animals[0]
+  const extent = width => {
+    const a = project({ x: -1, y: 0, z: 0 }, pose, width, 1200)
+    const b = project({ x: 1, y: 0, z: 0 }, pose, width, 1200)
+    return Math.hypot(a.x - b.x, a.y - b.y)
+  }
+  assert(Math.abs(extent(1440) - extent(2560)) < 1e-9,
+    'large screens increase the scene area without enlarging the animal')
+  console.log('Open-wing glide, drag, independent gait transitions, local interaction and bounded scale passed')
 
 } finally {
   rmSync(output, { recursive: true, force: true })

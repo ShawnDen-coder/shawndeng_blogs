@@ -7,7 +7,6 @@ export const Route = createFileRoute('/posts/')({
     pageHead('文章', '动手实践中的记录，和解决问题时留下的思考。', '/posts'),
   component: () => (
     <section className="inner-page">
-      <p className="eyebrow">FIELD NOTES</p>
       <h1>文章</h1>
       <p className="page-lede">动手实践中的记录，和解决问题时留下的思考。</p>
       <PostList />

@@ -16,7 +16,6 @@ export const Route = createFileRoute('/resume')({
 function Resume() {
   return (
     <section className="inner-page">
-      <p className="eyebrow">RÉSUMÉ</p>
       <h1>简历</h1>
       <p className="page-lede">Shawn Deng / AI Agent · DevOps · Homelab</p>
       <div className="resume-note">
