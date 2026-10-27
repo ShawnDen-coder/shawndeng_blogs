@@ -1,18 +1,29 @@
 import type { MantaPose } from './world'
-import { finBend } from './motion-curves'
+import type { Point3 } from './geometry'
+import { orient } from './geometry'
 
-/** Material stays attached to the fin; folding changes its light, not its markings. */
-export function mantaAppearance(u: number, v: number, pose: MantaPose) {
+const clamp = (value: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, value))
+
+/** Distance is optical transmission, independent of the material's own light. */
+export function depthTransmission(depth: number) {
+  return Math.exp(-Math.max(0, depth) * .24)
+}
+
+/** Stable body-space material, lit by the actual deformed surface normal. */
+export function mantaAppearance(u: number, v: number, pose: MantaPose, normal: Point3) {
+  const n = orient(normal, pose)
+  const length = Math.max(.00001, Math.hypot(n.x, n.y, n.z))
+  // Both sides catch light; the light direction stays fixed as the animal turns.
+  const face = n.z > 0 ? -1 : 1
+  const diffuse = Math.max(0, (n.x * -.32 - n.y * .30 - n.z * .90) * face / length)
   const span = Math.abs(u)
-  const bend = finBend(pose.rig.time, Math.max(0, (span - .15) / .85), v,
-    pose.rig.settings, pose.bank, Math.sign(u))
-  const facing = Math.max(0, Math.cos(bend + pose.bank * Math.sign(u)))
-  const belly = Math.exp(-u * u * 7)
-  const edge = Math.min(v, 1 - v)
-  const light = (.22 + belly * .42 + Math.sin(v * Math.PI) * .16 + facing * .22 +
-    (edge < .065 ? .06 : 0)) * (1 - pose.depth * .09)
-  // Restrained amber at the shoulders, framed by a pale belly and violet-grey tips.
-  const shoulder = Math.exp(-(((span - .38) / .19) ** 2) - ((v - .30) / .34) ** 2)
-  const warmth = shoulder * (.65 + facing * .25) * Math.exp(-Math.max(0, pose.depth) * .35)
-  return { light: Math.max(.15, Math.min(1, light)), warmth }
+  const belly = Math.exp(-u * u * 12) * Math.sin(Math.PI * v) ** .45
+  const rootShade = Math.exp(-(((span - .26) / .12) ** 2)) * Math.sin(v * Math.PI)
+  const rim = Math.exp(-(((v - .12) / .07) ** 2)) * (1 - span) * .1
+  const light = .18 + diffuse * .62 + belly * .22 - rootShade * .14 + rim
+  // Low-frequency shoulder markings belong to the skin, not the screen grid.
+  const shoulder = Math.exp(-(((span - .40) / .18) ** 2) - ((v - .27) / .23) ** 2)
+  const mottling = .82 + .18 * Math.sin(u * 17 + Math.sin(v * 9))
+  const warmth = shoulder * mottling * (.50 + diffuse * .5)
+  return { light: clamp(light, .08, 1), warmth }
 }

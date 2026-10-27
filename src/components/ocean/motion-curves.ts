@@ -3,6 +3,7 @@ import type { MantaPose } from './world'
 export type MotionSettings = {
   period: number; hold: number; amplitude: number
   delay: number; twist: number; turn: number
+  activity?: number
 }
 export const DEFAULT_MOTION: MotionSettings = {
   period: 3.8, hold: .45, amplitude: .82, delay: .30, twist: .28, turn: .20
@@ -12,7 +13,7 @@ const ease = (t: number) => { const x = clamp(t, 0, 1); return x ** 3 * (10 - 15
 const derivative = (t: number) => { const x = clamp(t, 0, 1); return 30 * x * x * (1 - x) ** 2 }
 
 /** Asymmetric stroke; the glide stays at the upper reversal, with C2 joins. */
-export function strokeCurve(time: number, settings: MotionSettings) {
+function calibratedStroke(time: number, settings: MotionSettings) {
   const { period, hold, amplitude } = settings
   const phase = ((time % period) + period) % period
   const downTime = (period - hold) * .43
@@ -30,6 +31,17 @@ export function strokeCurve(time: number, settings: MotionSettings) {
   return { angle: lower + (upper - lower) * ease(t), velocity,
     thrust: .70 * Math.abs(velocity) ** 1.4, stage: '上拍' }
 }
+
+/** Blend toward an open resting wing without resetting the calibrated phase. */
+export function strokeCurve(time: number, settings: MotionSettings) {
+  const stroke = calibratedStroke(time, settings)
+  const activity = clamp(settings.activity ?? 1, 0, 1)
+  return { angle: .28 + (stroke.angle - .28) * activity,
+    velocity: stroke.velocity * activity, thrust: stroke.thrust * activity ** 1.4,
+    stage: activity < .08 ? '滑行' : stroke.stage }
+}
+
+export type RigSample = { time: number; heading: number; strokeVelocity?: number }
 
 /** Stiff inner span, flexible outer span, with passive tip lag opposing fin velocity. */
 export function finBend(time: number, bend: number, chord: number, settings: MotionSettings, bank = 0, side = 1) {
@@ -110,14 +122,15 @@ export function turnCurve(time: number, settings: MotionSettings) {
 }
 
 /** Inextensible passive tail: delayed turn history and a small stroke-driven vertical response. */
-export function tailPoint(position: number, time: number, settings: MotionSettings, history?: Array<{ time: number; heading: number }>) {
+export function tailPoint(position: number, time: number, settings: MotionSettings, history?: RigSample[]) {
   const length = clamp(position, 0, 1)
   const lag = settings.period * .32
   const yaw = (heading: number) => Math.atan2(-Math.cos(heading), Math.sin(heading) / .747)
-  const headingAt = (age: number) => {
-    if (!history?.length) return turnCurve(time - age, settings).heading
+  const sampleAt = (age: number) => {
+    if (!history?.length) return { heading: turnCurve(time - age, settings).heading,
+      strokeVelocity: strokeCurve(time - age - .18, settings).velocity }
     const target = time - age
-    if (target <= history[0].time) return history[0].heading
+    if (target <= history[0].time) return history[0]
     let lo = 0, hi = history.length - 1
     while (hi - lo > 1) {
       const mid = (lo + hi) >> 1
@@ -125,19 +138,23 @@ export function tailPoint(position: number, time: number, settings: MotionSettin
       else hi = mid
     }
     const mix = clamp((target - history[lo].time) / Math.max(1e-8, history[hi].time - history[lo].time), 0, 1)
-    return history[lo].heading + (history[hi].heading - history[lo].heading) * mix
+    const a = history[lo], b = history[hi]
+    return { heading: a.heading + (b.heading - a.heading) * mix,
+      strokeVelocity: a.strokeVelocity !== undefined && b.strokeVelocity !== undefined
+        ? a.strokeVelocity + (b.strokeVelocity - a.strokeVelocity) * mix : undefined }
   }
-  const currentYaw = yaw(headingAt(0))
+  const currentYaw = yaw(sampleAt(0).heading)
   const point = { x: 0, y: .015, z: .59 }
   const segments = 16
   const step = length * 1.56 / segments
   for (let i = 0; i < segments; i++) {
     const along = length * (i + .5) / segments
     const delayed = time - lag * along
-    const oldYaw = yaw(headingAt(lag * along))
+    const sample = sampleAt(lag * along)
+    const oldYaw = yaw(sample.heading)
     const bend = Math.atan2(Math.sin(oldYaw - currentYaw), Math.cos(oldYaw - currentYaw)) * 1.25
-    const stroke = strokeCurve(delayed - .18, settings)
-    const lift = -.115 * stroke.velocity * along
+    const velocity = sample.strokeVelocity ?? strokeCurve(delayed - .18, settings).velocity
+    const lift = -.115 * velocity * along
     // Segment length stays constant: flexing never stretches the tail like rubber.
     point.x += Math.sin(bend) * Math.cos(lift) * step
     point.y += Math.sin(lift) * step

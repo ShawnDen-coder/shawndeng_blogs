@@ -15,7 +15,6 @@ export const Route = createFileRoute('/about')({
 function About() {
   return (
     <section className="inner-page">
-      <p className="eyebrow">A LITTLE ABOUT ME</p>
       <h1>你好，我是 Shawn.</h1>
       <div className="about-copy space-y-6">
         <p>我关注 AI Agent、DevOps 与 Homelab，喜欢通过动手搭建来理解技术。</p>

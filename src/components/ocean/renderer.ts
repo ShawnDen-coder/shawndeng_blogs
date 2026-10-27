@@ -1,5 +1,5 @@
 import { project } from './geometry'
-import { mantaAppearance } from './appearance'
+import { depthTransmission, mantaAppearance } from './appearance'
 import { MantaWorld } from './world'
 import type { MantaPose } from './world'
 import { tailPoint, createFinSampler } from './motion-curves'
@@ -8,6 +8,7 @@ import type { Projected, Point3 } from './geometry'
 const ACROSS = 58
 const LENGTH = 25
 const GLYPHS = '·:;=+*ox%#'
+export type ReadingArea = { left: number; top: number; right: number; bottom: number }
 const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v))
 const hash = (x: number, y: number) => {
@@ -28,19 +29,44 @@ export class OceanRenderer {
   private warmth = new Float32Array(0)
   private marks = new Float32Array(0)
   private vertices: Projected[] = []
+  private points: Point3[] = []
+  private readingAreas: ReadingArea[] = []
+  private legibility = new Float32Array(0)
   private dpr = 1
-  private colors = Array.from({ length: 24 }, (_, i) => {
-    const light = i / 23
-    const neutral = [92 + light * 144, 90 + light * 138, 108 + light * 110]
-    const amber = [100 + light * 132, 59 + light * 102, 56 + light * 62]
-    return Array.from({ length: 12 }, (_, j) => {
-      const tint = j / 11
-      return `rgb(${neutral.map((value, channel) => Math.round(value + (amber[channel] - value) * tint)).join(' ')})`
-    })
-  })
+  private colors: string[][] = []
+  private tiles: string[][] = []
+  private theme: 'light' | 'dark' = 'dark'
 
   constructor(private ctx: CanvasRenderingContext2D, seed?: number) {
     if (seed !== undefined) this.world = new MantaWorld(seed)
+    this.setTheme('dark')
+  }
+
+  setTheme(theme: 'light' | 'dark') {
+    this.theme = theme
+    this.colors = Array.from({ length: 24 }, (_, i) => {
+      const light = i / 23
+      // Light paper needs darker ink; retain the shoulder tint and depth layers.
+      const neutral = theme === 'light'
+        ? [168 - light * 106, 161 - light * 103, 151 - light * 98]
+        : [92 + light * 144, 90 + light * 138, 108 + light * 110]
+      const amber = theme === 'light'
+        ? [180 - light * 44, 132 - light * 74, 99 - light * 65]
+        : [100 + light * 132, 59 + light * 102, 56 + light * 62]
+      return Array.from({ length: 12 }, (_, j) => {
+        const tint = j / 11
+        return `rgb(${neutral.map((value, channel) => Math.round(value + (amber[channel] - value) * tint)).join(' ')})`
+      })
+    })
+    this.tiles = Array.from({ length: 24 }, (_, i) => {
+      const light = i / 23
+      const neutral = theme === 'light'
+        ? [64 + light * 100, 61 + light * 97, 56 + light * 94]
+        : [52 + light * 184, 51 + light * 177, 50 + light * 168]
+      const amber = theme === 'light' ? [170, 106, 67] : [220, 146, 91]
+      return Array.from({ length: 12 }, (_, j) => `rgb(${neutral.map((value, channel) =>
+        Math.round(value + (amber[channel] - value) * j / 11)).join(' ')})`)
+    })
   }
 
   resize(width: number, height: number, dpr: number) {
@@ -56,6 +82,27 @@ export class OceanRenderer {
     this.ink = new Float32Array(this.depth.length)
     this.marks = new Float32Array(this.depth.length)
     this.warmth = new Float32Array(this.depth.length)
+    this.legibility = new Float32Array(this.depth.length)
+    this.setReadingAreas(this.readingAreas)
+  }
+
+  setReadingAreas(areas: ReadingArea[]) {
+    this.readingAreas = areas
+    for (let row = 0; row < this.rows; row++) for (let col = 0; col < this.cols; col++) {
+      const x = (col + .5) * this.cell, y = (row + .5) * this.cell
+      let opacity = 1
+      for (const area of areas) {
+        const distance = Math.hypot(Math.max(area.left - x, 0, x - area.right),
+          Math.max(area.top - y, 0, y - area.bottom))
+        const t = Math.min(1, distance / 48)
+        opacity = Math.min(opacity, .14 + .86 * t * t * (3 - 2 * t))
+      }
+      this.legibility[row * this.cols + col] = opacity
+    }
+  }
+
+  disturb(x: number, y: number) {
+    if (this.width && this.height) this.world.disturb(x / this.width, y / this.height)
   }
 
   private triangle(a: Projected, b: Projected, c: Projected) {
@@ -99,8 +146,8 @@ export class OceanRenderer {
         this.ink[index] = a.light * w1 + b.light * w2 + c.light * w3
         this.warmth[index] = a.warmth * w1 + b.warmth * w2 + c.warmth * w3
         this.marks[index] = hash(
-          Math.round((a.u * w1 + b.u * w2 + c.u * w3) * 100),
-          Math.round((a.v * w1 + b.v * w2 + c.v * w3) * 80)
+          Math.round((a.u * w1 + b.u * w2 + c.u * w3) * 20),
+          Math.round((a.v * w1 + b.v * w2 + c.v * w3) * 16)
         )
       }
     }
@@ -126,7 +173,7 @@ export class OceanRenderer {
       const x =
         ((hash(i, 4) + time * (0.0008 + hash(i, 7) * 0.0005)) % 1) * width
       const y = ((hash(i, 9) - time * 0.0015 + 10) % 1) * height * 0.94
-      ctx.fillStyle = `rgba(172,161,158,${0.1 + hash(i, 12) * 0.13})`
+      ctx.fillStyle = `rgba(${this.theme === 'light' ? '100,91,79' : '172,161,158'},${0.1 + hash(i, 12) * 0.13})`
       ctx.fillText('·', x, y)
     }
 
@@ -134,21 +181,34 @@ export class OceanRenderer {
     this.ink.fill(0)
     this.warmth.fill(0)
     for (const pose of poses ?? this.world.advance(time, width, height)) {
-      const sampleSurface = createFinSampler(pose.rig.time, pose.rig.settings, pose.bank, LENGTH)
+      const sampleSurface = createFinSampler(pose.rig.phaseTime ?? pose.rig.time, pose.rig.settings, pose.bank, LENGTH)
       const vertices = this.vertices
+      const points = this.points
+      for (let i = 0; i <= ACROSS; i++) for (let j = 0; j <= LENGTH; j++)
+        points[i * (LENGTH + 1) + j] = sampleSurface(i / ACROSS * 2 - 1, j / LENGTH)
       for (let i = 0; i <= ACROSS; i++) {
         const u = (i / ACROSS) * 2 - 1
         for (let j = 0; j <= LENGTH; j++) {
           const v = j / LENGTH
           const p = project(
-            sampleSurface(u, v),
+            points[i * (LENGTH + 1) + j],
             pose,
             width,
             height,
             pointerX,
             pointerY
           )
-          const appearance = mantaAppearance(u, v, pose)
+          const left = points[Math.max(0, i - 1) * (LENGTH + 1) + j]
+          const right = points[Math.min(ACROSS, i + 1) * (LENGTH + 1) + j]
+          const front = points[i * (LENGTH + 1) + Math.max(0, j - 1)]
+          const back = points[i * (LENGTH + 1) + Math.min(LENGTH, j + 1)]
+          const du = { x: right.x - left.x, y: right.y - left.y, z: right.z - left.z }
+          const dv = { x: back.x - front.x, y: back.y - front.y, z: back.z - front.z }
+          const appearance = mantaAppearance(u, v, pose, {
+            x: du.y * dv.z - du.z * dv.y,
+            y: du.z * dv.x - du.x * dv.z,
+            z: du.x * dv.y - du.y * dv.x
+          })
           p.light = appearance.light
           p.warmth = appearance.warmth
           p.u = u
@@ -177,8 +237,8 @@ export class OceanRenderer {
           const index = y * cols + x + dx
           if (p.depth > this.depth[index] + .12) continue
           this.depth[index] = p.depth - .02
-          this.ink[index] = light * (1 - pose.depth * .09)
-          this.warmth[index] = warmth * Math.exp(-Math.max(0, pose.depth) * .35)
+          this.ink[index] = light
+          this.warmth[index] = warmth
           this.marks[index] = 0.5
         }
       }
@@ -225,13 +285,22 @@ export class OceanRenderer {
         const light = this.ink[index]
         if (light < 0.1) continue
         const noise = this.marks[index]
-        ctx.fillStyle = this.colors[Math.round(clamp(light, 0, 1) * 23)][Math.round(clamp(this.warmth[index], 0, 1) * 11)]
-        ctx.globalAlpha = 0.67 + light * 0.29
+        const transmission = depthTransmission(this.depth[index] - 6)
+        const visibility = transmission * this.legibility[index]
+        const tone = Math.round(clamp(light, 0, 1) * 23)
+        const tint = Math.round(clamp(this.warmth[index] * transmission, 0, 1) * 11)
+        const x = col * cell, y = row * cell
+        // A quiet tonal tile establishes volume; the glyph adds surface detail.
+        ctx.fillStyle = this.tiles[tone][tint]
+        ctx.globalAlpha = visibility * (this.theme === 'light' ? .12 + (1 - light) * .18 : .12 + light * .28)
+        ctx.fillRect(x + .6, y + .6, cell - 1.2, cell - 1.2)
+        ctx.fillStyle = this.colors[tone][tint]
+        ctx.globalAlpha = visibility * (.46 + light * .45)
         const glyph =
           GLYPHS[
             Math.min(
               GLYPHS.length - 1,
-              Math.floor((light * 0.4 + noise * 0.6) * GLYPHS.length)
+              Math.floor((light * .88 + noise * .12) * (.45 + transmission * .55) * GLYPHS.length)
             )
           ]
         ctx.fillText(glyph, (col + 0.5) * cell, (row + 0.5) * cell)
@@ -241,7 +310,7 @@ export class OceanRenderer {
     if (ripple && ripple.age < 3) {
       const radius = 18 + ripple.age * 62
       const count = Math.max(24, Math.round(radius * 0.65))
-      ctx.fillStyle = `rgba(236,228,218,${(1 - ripple.age / 3) * 0.34})`
+      ctx.fillStyle = `rgba(${this.theme === 'light' ? '73,64,52' : '236,228,218'},${(1 - ripple.age / 3) * 0.34})`
       for (let i = 0; i < count; i++) {
         const angle = (i / count) * Math.PI * 2
         ctx.fillText(

@@ -1,51 +1,20 @@
-/* One screen, one scene. The reading layout stays unchanged on inner routes. */
-.site-shell--ocean {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  isolation: isolate;
-}
-.site-shell--ocean .site-header {
-  width: min(1120px, calc(100% - 96px));
-  margin-inline: auto;
-  padding: 28px 0 12px;
-  min-height: 84px;
-  position: relative;
-  z-index: 2;
-}
-.site-shell--ocean .wordmark {
-  font-size: 18px;
-}
-.site-shell--ocean main {
-  display: flex;
-  flex: 1;
-}
-.site-shell--ocean .site-footer {
-  width: min(1120px, calc(100% - 96px));
-  margin: 0 auto;
-  border: 0;
-  padding: 24px 0 24px;
-  min-height: 72px;
-  font-size: 11px;
-}
+/* The homepage is one viewport-wide scene, with content layered above it. */
 .ocean-home {
   width: 100%;
   display: flex;
   flex-direction: column;
-  min-height: calc(100svh - 156px);
+  justify-content: flex-end;
+  padding-block: clamp(160px, 30svh, 360px) clamp(24px, 5svh, 64px);
 }
 .ocean-scene {
-  position: relative;
-  width: min(1440px, 100%);
-  min-height: 330px;
-  flex: 1;
-  height: max(340px, calc(100svh - 432px));
-  max-height: 720px;
-  margin-inline: auto;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
 }
 .ocean-art {
   position: absolute;
-  inset: -16px 0 0;
+  inset: 0;
   pointer-events: none;
 }
 .ocean-canvas,
@@ -62,7 +31,7 @@
   visibility: hidden;
 }
 .ocean-intro {
-  width: min(760px, calc(100% - 96px));
+  width: min(var(--reading-width), calc(100% - var(--page-gutter) * 2));
   margin-inline: auto;
   padding: 24px 0 16px;
   position: relative;
@@ -96,7 +65,7 @@
   color: var(--ui-info);
   text-decoration: underline;
   text-decoration-thickness: 1px;
-  text-decoration-color: rgb(233 161 132 / 40%);
+  text-decoration-color: color-mix(in srgb, var(--ui-info) 45%, transparent);
   text-underline-offset: 5px;
 }
 .ocean-copy a:hover {
@@ -125,38 +94,8 @@
   font-size: 20px;
   font-weight: 400;
 }
-@media (min-width: 1800px) {
-  .ocean-scene {
-    max-height: 850px;
-  }
-}
 @media (max-width: 640px) {
-  .site-shell--ocean .site-header {
-    width: calc(100% - 48px);
-    padding: 20px 0 8px;
-    min-height: 72px;
-    gap: 12px;
-  }
-  .site-shell--ocean .site-header nav {
-    gap: 18px;
-    font-size: 13px;
-  }
-  .site-shell--ocean .wordmark {
-    font-size: 16px;
-  }
-  .ocean-home {
-    min-height: calc(100svh - 152px);
-  }
-  .ocean-scene {
-    min-height: 280px;
-    height: 39svh;
-    max-height: 420px;
-  }
-  .ocean-art {
-    inset: -4px 0 0;
-  }
   .ocean-intro {
-    width: calc(100% - 48px);
     padding-top: 18px;
     padding-bottom: 8px;
   }
@@ -176,23 +115,6 @@
     font-size: 12px;
     gap: 12px 22px;
     margin-top: 14px;
-  }
-  .site-shell--ocean .site-footer {
-    width: calc(100% - 48px);
-    font-size: 10px;
-    padding-block: 20px;
-    gap: 12px;
-  }
-  .site-shell--ocean .site-footer > div {
-    gap: 16px;
-  }
-}
-@media (max-width: 360px) {
-  .site-shell--ocean .site-header nav {
-    gap: 12px;
-  }
-  .ocean-name {
-    display: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {

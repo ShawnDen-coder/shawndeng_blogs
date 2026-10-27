@@ -28,6 +28,8 @@ export function OceanScene() {
     let height = 0
     let time = captureTime ?? 3.4
     let last = 0
+    let lastDraw = 0
+    let frameBudget = 0
     let raf = 0
     let visible = true
     let disposed = false
@@ -50,12 +52,16 @@ export function OceanScene() {
         last = 0
         return
       }
-      if (!last) last = now
+      if (!last) last = lastDraw = now
       const elapsed = now - last
+      last = now
+      frameBudget += elapsed
       // Cap animation at 30 fps; large gaps never jump the animal forward.
-      if (elapsed >= 1000 / 30) {
-        time += Math.min(elapsed / 1000, 0.06)
-        last = now
+      // Carry fractional frame time forward instead of losing it at 60 Hz boundaries.
+      if (frameBudget >= 1000 / 30) {
+        time += Math.min((now - lastDraw) / 1000, 0.06)
+        lastDraw = now
+        frameBudget %= 1000 / 30
         pointerX += (targetX - pointerX) * 0.045
         pointerY += (targetY - pointerY) * 0.045
         draw()
@@ -64,7 +70,7 @@ export function OceanScene() {
     }
     function schedule() {
       cancelAnimationFrame(raf)
-      last = 0
+      last = lastDraw = frameBudget = 0
       if (
         !disposed &&
         captureTime === undefined &&
@@ -74,6 +80,18 @@ export function OceanScene() {
       )
         raf = requestAnimationFrame(frame)
     }
+    const updateReadingAreas = () => {
+      const origin = canvas.getBoundingClientRect()
+      const areas = Array.from(document.querySelectorAll(
+        '.site-header, .ocean-intro h1, .ocean-copy, .ocean-links, .site-footer'
+      )).map(element => {
+        const rect = element.getBoundingClientRect()
+        return { left: rect.left - origin.left, top: rect.top - origin.top,
+          right: rect.right - origin.left, bottom: rect.bottom - origin.top }
+      })
+      renderer.setReadingAreas(areas)
+      if (motion.matches || captureTime !== undefined) draw()
+    }
     const resize = () => {
       if (disposed) return
       const rect = canvas.getBoundingClientRect()
@@ -81,6 +99,7 @@ export function OceanScene() {
       height = rect.height
       if (!width || !height) return
       renderer.resize(width, height, window.devicePixelRatio || 1)
+      updateReadingAreas()
       draw()
       setReady(true)
     }
@@ -119,9 +138,18 @@ export function OceanScene() {
       const y = event.clientY - rect.top
       if (x < 0 || x > width || y < 0 || y > height) return
       ripple = { x, y, born: time }
+      renderer.disturb(x, y)
     }
     const resizeObserver = new ResizeObserver(resize)
+    const updateTheme = () => {
+      renderer.setTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark')
+      if (width && height) draw()
+    }
+    const themeObserver = new MutationObserver(updateTheme)
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    updateTheme()
     resizeObserver.observe(canvas)
+    document.querySelectorAll('.ocean-intro, .site-header, .site-footer').forEach(element => resizeObserver.observe(element))
     const visibilityObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting
       schedule()
@@ -132,16 +160,18 @@ export function OceanScene() {
     window.addEventListener('pointermove', onPointerMove, { passive: true })
     document.documentElement.addEventListener('pointerleave', onPointerLeave)
     window.addEventListener('click', onClick)
+    window.addEventListener('scroll', updateReadingAreas, { passive: true })
     updateMotion()
     resize()
     // Repaint after the real font arrives; the intro never waits for the canvas.
     document.fonts.ready.then(() => {
-      if (!disposed) draw()
+      if (!disposed) { updateReadingAreas(); draw() }
     })
     return () => {
       disposed = true
       cancelAnimationFrame(raf)
       resizeObserver.disconnect()
+      themeObserver.disconnect()
       visibilityObserver.disconnect()
       motion.removeEventListener('change', updateMotion)
       document.removeEventListener('visibilitychange', schedule)
@@ -151,6 +181,7 @@ export function OceanScene() {
         onPointerLeave
       )
       window.removeEventListener('click', onClick)
+      window.removeEventListener('scroll', updateReadingAreas)
     }
   }, [])
 
@@ -164,7 +195,7 @@ export function OceanScene() {
         >
           <g
             transform="translate(570 220) rotate(-12)"
-            stroke="#ece4da"
+            stroke="var(--ui-text-primary)"
             strokeWidth="1.4"
             opacity=".58"
           >
