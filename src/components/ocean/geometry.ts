@@ -7,6 +7,7 @@ export type Projected = {
   y: number
   depth: number
   light: number
+  warmth: number
   u: number
   v: number
 }
@@ -34,6 +35,6 @@ export function project(
   return {
     x: width * pose.x + x / depth * focal + pointerX * 5,
     y: height * pose.y - cameraY / depth * focal + pointerY * 3,
-    depth, light: .7, u: 0, v: 0
+    depth, light: .7, warmth: 0, u: 0, v: 0
   }
 }

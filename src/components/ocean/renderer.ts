@@ -1,4 +1,5 @@
 import { project } from './geometry'
+import { mantaAppearance } from './appearance'
 import { MantaWorld } from './world'
 import type { MantaPose } from './world'
 import { tailPoint, createFinSampler } from './motion-curves'
@@ -24,12 +25,18 @@ export class OceanRenderer {
   private rows = 0
   private depth = new Float32Array(0)
   private ink = new Float32Array(0)
+  private warmth = new Float32Array(0)
   private marks = new Float32Array(0)
   private vertices: Projected[] = []
   private dpr = 1
   private colors = Array.from({ length: 24 }, (_, i) => {
-    const t = i / 23
-    return `rgb(${Math.round(92 + t * 144)} ${Math.round(90 + t * 138)} ${Math.round(108 + t * 110)})`
+    const light = i / 23
+    const neutral = [92 + light * 144, 90 + light * 138, 108 + light * 110]
+    const amber = [100 + light * 132, 59 + light * 102, 56 + light * 62]
+    return Array.from({ length: 12 }, (_, j) => {
+      const tint = j / 11
+      return `rgb(${neutral.map((value, channel) => Math.round(value + (amber[channel] - value) * tint)).join(' ')})`
+    })
   })
 
   constructor(private ctx: CanvasRenderingContext2D, seed?: number) {
@@ -48,6 +55,7 @@ export class OceanRenderer {
     this.depth = new Float32Array(this.cols * this.rows)
     this.ink = new Float32Array(this.depth.length)
     this.marks = new Float32Array(this.depth.length)
+    this.warmth = new Float32Array(this.depth.length)
   }
 
   private triangle(a: Projected, b: Projected, c: Projected) {
@@ -89,6 +97,7 @@ export class OceanRenderer {
         if (depth >= this.depth[index]) continue
         this.depth[index] = depth
         this.ink[index] = a.light * w1 + b.light * w2 + c.light * w3
+        this.warmth[index] = a.warmth * w1 + b.warmth * w2 + c.warmth * w3
         this.marks[index] = hash(
           Math.round((a.u * w1 + b.u * w2 + c.u * w3) * 100),
           Math.round((a.v * w1 + b.v * w2 + c.v * w3) * 80)
@@ -123,6 +132,7 @@ export class OceanRenderer {
 
     this.depth.fill(Infinity)
     this.ink.fill(0)
+    this.warmth.fill(0)
     for (const pose of poses ?? this.world.advance(time, width, height)) {
       const sampleSurface = createFinSampler(pose.rig.time, pose.rig.settings, pose.bank, LENGTH)
       const vertices = this.vertices
@@ -138,14 +148,9 @@ export class OceanRenderer {
             pointerX,
             pointerY
           )
-          const edge = Math.min(v, 1 - v)
-          const belly = Math.exp(-u * u * 7)
-          const light =
-            0.31 +
-            belly * 0.44 +
-            0.19 * Math.sin(v * Math.PI) +
-            0.11 * Math.cos(u * 2.6 + time * 0.18)
-          p.light = clamp((light + (edge < 0.065 ? 0.12 : 0)) * (1 - pose.depth * .09), 0.15, 1)
+          const appearance = mantaAppearance(u, v, pose)
+          p.light = appearance.light
+          p.warmth = appearance.warmth
           p.u = u
           p.v = v
           vertices[i * (LENGTH + 1) + j] = p
@@ -163,7 +168,7 @@ export class OceanRenderer {
       }
 
       // Cephalic fins, tapering tail and five pairs of ventral gills make the silhouette a manta.
-      const stamp = (point: Point3, light: number, widthInCells = 0) => {
+      const stamp = (point: Point3, light: number, widthInCells = 0, warmth = 0) => {
         const p = project(point, pose, width, height, pointerX, pointerY)
         const x = Math.floor(p.x / cell)
         const y = Math.floor(p.y / cell)
@@ -173,6 +178,7 @@ export class OceanRenderer {
           if (p.depth > this.depth[index] + .12) continue
           this.depth[index] = p.depth - .02
           this.ink[index] = light * (1 - pose.depth * .09)
+          this.warmth[index] = warmth * Math.exp(-Math.max(0, pose.depth) * .35)
           this.marks[index] = 0.5
         }
       }
@@ -193,7 +199,8 @@ export class OceanRenderer {
               z: -0.6 - t * 0.32
             },
             0.74,
-            1
+            1,
+            .45
           )
         }
         for (let gill = 0; gill < 5; gill++) {
@@ -218,7 +225,7 @@ export class OceanRenderer {
         const light = this.ink[index]
         if (light < 0.1) continue
         const noise = this.marks[index]
-        ctx.fillStyle = this.colors[Math.round(clamp(light, 0, 1) * 23)]
+        ctx.fillStyle = this.colors[Math.round(clamp(light, 0, 1) * 23)][Math.round(clamp(this.warmth[index], 0, 1) * 11)]
         ctx.globalAlpha = 0.67 + light * 0.29
         const glyph =
           GLYPHS[
