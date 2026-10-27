@@ -1,28 +1,40 @@
 {
+  "name": "shawn-personal-site",
   "private": true,
-  "engines": {"node": ">=20 <21"},
-  "packageManager": "yarn@1.22.22",
-  "license": "MIT",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "dev": "next",
-    "build": "node ./scripts/validate-content.js && node ./scripts/gen-rss.js && next build && node ./scripts/validate-build.js",
-    "test:content": "node ./scripts/validate-content.js",
-    "start": "next start"
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build && tsc --noEmit && node scripts/finalize-static.mjs",
+    "preview": "node scripts/serve-static.mjs",
+    "typecheck": "tsc --noEmit",
+    "predev": "node scripts/prepare-content.mjs",
+    "prebuild": "node scripts/prepare-content.mjs",
+    "pretypecheck": "node scripts/prepare-content.mjs",
+    "test:content": "node scripts/prepare-content.mjs",
+    "test:ocean": "node scripts/test-ocean.mjs"
   },
   "dependencies": {
-    "gray-matter": "^4.0.3",
-    "next": "^14.2.5",
-    "nextra": "^2.13.2",
-    "nextra-theme-blog": "^2.13.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "rss": "^1.2.2"
+    "@fontsource/jetbrains-mono": "^5.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.0.0",
+    "remark-gfm": "^4.0.0",
+    "@tanstack/react-start": "^1.169.3",
+    "@tanstack/react-router": "^1.170.45"
   },
-  "prettier": {
-    "arrowParens": "always",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "none",
-    "semi": false
-  }
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "tailwindcss": "^4.1.0",
+    "vite": "^8.0.0",
+    "typescript": "^5.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/node": "^24.0.0",
+    "yaml": "^2.8.0"
+  },
+  "type": "module"
 }
