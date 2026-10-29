@@ -1,6 +1,30 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { parse } from 'yaml'
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import { render } from 'pele'
+import { pathToFileURL } from 'node:url'
+
+export function renderMermaidFences(content, file) {
+  const tree = unified().use(remarkParse).parse(content)
+  const blocks = []
+  function visit(node) {
+    if (node.type === 'code' && node.lang === 'mermaid') blocks.push(node)
+    for (const child of node.children || []) visit(child)
+  }
+  visit(tree)
+  for (const [index, node] of blocks.entries()) {
+    try {
+      const { svg } = render(node.value)
+      node.replacement = `\`\`\`pele-svg\n${Buffer.from(svg).toString('base64')}\n\`\`\``
+    } catch (error) {
+      throw new Error(`${file}: Mermaid block ${index + 1} (line ${node.position.start.line}): ${error.message}`, { cause: error })
+    }
+  }
+  for (const node of blocks.reverse()) content = content.slice(0, node.position.start.offset) + node.replacement + content.slice(node.position.end.offset)
+  return content
+}
 
 export function readPosts() {
   const seen = new Set()
@@ -43,12 +67,13 @@ export function readPosts() {
         date,
         author: String(data.author),
         tags,
-        body: content.trim()
+        body: renderMermaidFences(content.trim(), file)
       }
     })
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
 const posts = readPosts()
 fs.mkdirSync('src/generated/articles', { recursive: true })
 for (const old of fs.readdirSync('src/generated/articles'))
@@ -67,3 +92,5 @@ fs.writeFileSync(
   )}\n`
 )
 console.log(`Prepared ${posts.length} articles`)
+
+}

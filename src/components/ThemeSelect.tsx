@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { applyTheme, isThemePreference, themeStorageKey } from '../lib/theme'
 import type { ThemePreference } from '../lib/theme'
 
 export function ThemeSelect() {
   const [preference, setPreference] = useState<ThemePreference>('system')
+  const sequence = useRef(0)
+  const active = useRef<ViewTransition | null>(null)
 
   useEffect(() => {
     let current: ThemePreference = 'system'
@@ -16,6 +18,10 @@ export function ThemeSelect() {
     const sync = (event: StorageEvent) => {
       if (event.key !== themeStorageKey && event.key !== null) return
       const next = isThemePreference(event.newValue) ? event.newValue : 'system'
+      ++sequence.current
+      active.current?.skipTransition()
+      active.current = null
+      window.dispatchEvent(new Event('scene-unfreeze'))
       setPreference(next)
       applyTheme(next)
     }
@@ -41,7 +47,28 @@ export function ThemeSelect() {
         const next = event.target.value
         if (!isThemePreference(next)) return
         setPreference(next)
-        applyTheme(next)
+        const target = next === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : next
+        const id = ++sequence.current
+        if (active.current) {
+          active.current.skipTransition()
+          active.current = null
+          applyTheme(next)
+          window.dispatchEvent(new Event('scene-unfreeze'))
+        } else if (target !== document.documentElement.dataset.theme && !matchMedia('(prefers-reduced-motion: reduce)').matches && document.startViewTransition) {
+          const rect = event.currentTarget.getBoundingClientRect()
+          const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2
+          const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
+          window.dispatchEvent(new Event('scene-freeze'))
+          try {
+            const transition = document.startViewTransition(() => { if (sequence.current === id) { applyTheme(next); window.dispatchEvent(new Event('scene-redraw')) } })
+            active.current = transition
+            transition.ready.then(() => {
+              if (sequence.current !== id) return
+              document.documentElement.animate({ clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] }, { duration: 240, easing: 'cubic-bezier(.2, 0, .2, 1)', pseudoElement: '::view-transition-new(root)' }).finished.catch(() => transition.skipTransition())
+            }).catch(() => { transition.skipTransition(); if (sequence.current === id) { applyTheme(next); window.dispatchEvent(new Event('scene-redraw')) } })
+            transition.finished.catch(() => { if (sequence.current === id) { applyTheme(next); window.dispatchEvent(new Event('scene-redraw')) } }).finally(() => { if (sequence.current === id) { active.current = null; window.dispatchEvent(new Event('scene-unfreeze')) } })
+          } catch { active.current = null; applyTheme(next); window.dispatchEvent(new Event('scene-unfreeze')) }
+        } else applyTheme(next)
         try { localStorage.setItem(themeStorageKey, next) } catch { /* Optional persistence. */ }
       }}>
         <option value="system">跟随系统</option>

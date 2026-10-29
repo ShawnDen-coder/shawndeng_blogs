@@ -427,3 +427,15 @@ h1 {
     transition: none;
   }
 }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 2; }
+.pele-diagram {
+  --pele-bg: var(--ui-bg-page); --pele-fg: var(--ui-text-primary);
+  --pele-muted: var(--ui-text-muted); --pele-line: var(--ui-text-secondary);
+  --pele-surface: var(--ui-bg-elevated); --pele-surface-alt: var(--ui-bg-soft);
+  --pele-border: var(--ui-text-muted); --pele-accent: var(--ui-info);
+  --pele-font: var(--font-mono); --pele-font-mono: var(--font-mono);
+  overflow-x: auto; margin-block: 32px;
+}
+.pele-diagram svg { max-width: none !important; display: block; }
+.pele-diagram svg text { font-size: max(14px, 1em); }
