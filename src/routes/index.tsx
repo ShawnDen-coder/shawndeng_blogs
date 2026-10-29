@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { OceanScene } from '../components/ocean/OceanScene'
+import { SharkScene } from '../components/shark/SharkScene'
+import { useEffect, useState } from 'react'
 import { pageHead } from '../lib/seo'
 import { site } from '../lib/site'
 
@@ -14,9 +15,16 @@ export const Route = createFileRoute('/')({
 })
 
 function Home() {
+  const [paused, setPaused] = useState(false)
+  useEffect(() => {
+    const toggle = () => setPaused(value => !value)
+    window.addEventListener('scene-toggle', toggle)
+    return () => window.removeEventListener('scene-toggle', toggle)
+  }, [])
   return (
+    <>
     <section className="ocean-home" aria-labelledby="intro-title">
-      <OceanScene />
+      <SharkScene paused={paused} />
       <div className="ocean-intro">
         <h1 id="intro-title">
           你好，我是邓辉<span className="ocean-name">Shawn.</span>
@@ -43,5 +51,6 @@ function Home() {
         </div>
       </div>
     </section>
+    </>
   )
 }

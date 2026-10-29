@@ -1,5 +1,5 @@
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Arrow } from '../components/Arrow'
 import { ThemeSelect } from '../components/ThemeSelect'
 import { assetUrl, site } from '../lib/site'
@@ -12,6 +12,7 @@ const navigation = [
 ] as const
 
 export function SiteLayout({ children }: { children: ReactNode }) {
+  const [paused, setPaused] = useState(false)
   const matchRoute = useMatchRoute()
   const isLab = !!matchRoute({ to: '/lab/manta', fuzzy: false })
   const isHome = !!matchRoute({ to: '/', fuzzy: false })
@@ -62,6 +63,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           © {new Date().getFullYear()} {site.name}
         </span>
         <div className="flex items-center gap-5">
+          {isHome && <button className="scene-toggle" onClick={() => { setPaused(!paused); window.dispatchEvent(new Event('scene-toggle')) }}>{paused ? '继续场景' : '暂停场景'}</button>}
           <a href={assetUrl('feed.xml')}>RSS</a>
           <a href={site.github}>
             保持好奇，持续构建。 <Arrow diagonal />

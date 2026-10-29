@@ -41,6 +41,17 @@ function PostPage() {
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
+            pre: ({ children }) => {
+              const child = Array.isArray(children) ? children[0] : children
+              if (child && typeof child === 'object' && 'props' in child) {
+                const props = child.props as { className?: string; children?: string }
+                if (props.className === 'language-pele-svg' && typeof props.children === 'string') {
+                  const bytes = Uint8Array.from(atob(props.children.trim()), char => char.charCodeAt(0))
+                  return <div className="pele-diagram" dangerouslySetInnerHTML={{ __html: new TextDecoder().decode(bytes) }} />
+                }
+              }
+              return <pre>{children}</pre>
+            },
             img: ({ src, alt }) => (
               <img
                 src={src?.startsWith('/images/') ? assetUrl(src) : src}
