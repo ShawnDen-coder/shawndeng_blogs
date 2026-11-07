@@ -1,10 +1,10 @@
 import { Link } from '@tanstack/react-router'
 import { posts } from '../lib/posts'
 
-export function PostList() {
+export function PostList({ limit }: { limit?: number }) {
   return (
     <div className="post-list">
-      {posts.map((post) => (
+      {posts.slice(0, limit).map((post) => (
         <Link
           className="post-row block"
           to="/posts/$slug"

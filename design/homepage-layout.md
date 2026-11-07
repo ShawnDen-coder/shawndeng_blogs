@@ -121,3 +121,6 @@ Pencil / Figma 当前不可用，本文件就是版面稿。尺寸单位是 px�
 | `--pele-font`、`--pele-font-mono` | `--font-mono` |
 
 图上下留 32px。标签不小于 14px。用 320px 和 760px 容器检查，放不下就在图内横向滚动。解析失败要报到该文该块，不静默留白，不用 mermaid.js 兜底。没有围栏的文章不产生图。不要把现有 PNG 改成示意图。
+
+
+> 2026-11-07：个人网站布局与首页背景的替代设计见 `design/personal-site-redesign/PLAN.md`；旧首页场景描述仅保留作历史记录。

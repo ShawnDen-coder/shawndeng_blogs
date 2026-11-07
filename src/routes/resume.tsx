@@ -1,3 +1,4 @@
+import { ProfileLayout } from '../layouts/ProfileLayout'
 import { createFileRoute } from '@tanstack/react-router'
 import { Arrow } from '../components/Arrow'
 import { pageHead } from '../lib/seo'
@@ -15,7 +16,7 @@ export const Route = createFileRoute('/resume')({
 
 function Resume() {
   return (
-    <section className="inner-page">
+    <ProfileLayout><section className="inner-page">
       <h1>简历</h1>
       <p className="page-lede">Shawn Deng / AI Agent · DevOps · Homelab</p>
       <div className="resume-note">
@@ -25,6 +26,6 @@ function Resume() {
           先看看我的 GitHub <Arrow diagonal />
         </a>
       </div>
-    </section>
+    </section></ProfileLayout>
   )
 }

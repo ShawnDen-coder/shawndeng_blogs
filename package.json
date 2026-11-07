@@ -14,7 +14,8 @@
     "prebuild": "node scripts/prepare-content.mjs",
     "pretypecheck": "node scripts/prepare-content.mjs",
     "test:content": "node scripts/prepare-content.mjs",
-    "test:ocean": "node scripts/test-ocean.mjs"
+    "test:ocean": "node scripts/test-ocean.mjs",
+    "test:undertow": "node scripts/test-undertow.mjs"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.2.0",

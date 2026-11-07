@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="1650" viewBox="0 0 390 1650" role="img" aria-label="Shawn 个人网站源码依据的静态设计草图，非参考站截图">
+<title>Shawn 个人网站设计草图 — 源码依据，视觉实测待补</title>
+<rect width="390" height="1650" fill="#0c0e11"/>
+<rect width="390" height="64" fill="#1a1f26"/>
+<text x="20" y="26" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="12" font-weight="600" fill="#e8ebee">Cody · 源码依据的手机草图 · 390px</text>
+<text x="20" y="48" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="12" font-weight="400" fill="#adb5bf">非实站截图；Undertow 动画见方案</text>
+<text x="24" y="110" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="20" font-weight="600" fill="#e8ebee">shawn.</text>
+<text x="240" y="110" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">跟随系统 ⌄</text>
+<text x="24" y="160" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#e8ebee">首页</text>
+<text x="95" y="160" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">项目</text>
+<text x="166" y="160" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">文章</text>
+<text x="237" y="160" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">关于</text>
+<text x="308" y="160" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">简历</text>
+<path d="M24 174H52" stroke="#8fadc4" stroke-width="2"/>
+<text x="24" y="248" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="28" font-weight="600" fill="#e8ebee">你好，我是邓辉</text>
+<text x="24" y="284" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#e8ebee">Shawn.</text>
+<text x="24" y="332" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">从影视后期出发，现在构建</text>
+<text x="24" y="362" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">创作工具、平台与 AI 工作流。</text>
+<text x="24" y="414" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">喜欢把难题弄明白，做些真正</text>
+<text x="24" y="444" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">能帮上忙的东西。</text>
+<text x="24" y="494" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#8fadc4">GitHub ↗</text>
+<text x="147" y="494" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#8fadc4">更多关于我 →</text>
+<text x="24" y="538" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#8fadc4">查看简历 →</text>
+<text x="24" y="626" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="20" font-weight="600" fill="#e8ebee">正在构建</text>
+<text x="24" y="670" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="18" font-weight="600" fill="#e8ebee">这个个人网站 ↗</text>
+<text x="24" y="710" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">用代码整理自己的经历、项目与</text>
+<text x="24" y="740" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">文字。也把构建过程，作为一次</text>
+<text x="24" y="770" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">持续的工程实践。</text>
+<text x="24" y="812" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">React / TanStack Start</text>
+<text x="24" y="836" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">/ Tailwind CSS</text>
+<text x="24" y="884" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#8fadc4">项目页 →</text>
+<text x="24" y="980" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="20" font-weight="600" fill="#e8ebee">技术文章</text>
+<text x="24" y="1020" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">动手实践中的记录，和解决问题时</text>
+<text x="24" y="1050" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">留下的思考。</text>
+<text x="24" y="1108" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="18" font-weight="600" fill="#e8ebee">k8s 基础入门</text>
+<text x="24" y="1136" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">2025-03-01</text>
+<text x="24" y="1172" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">Kubernetes 常用命令与集群操作</text>
+<text x="24" y="1202" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">的基础实践。</text>
+<text x="24" y="1260" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="18" font-weight="600" fill="#e8ebee">Docker 基础入门</text>
+<text x="24" y="1288" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">2024-08-19</text>
+<text x="24" y="1324" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">Docker 镜像、容器与日常清理的</text>
+<text x="24" y="1354" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="16" font-weight="400" fill="#adb5bf">基础实践。</text>
+<text x="24" y="1408" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#8fadc4">全部文章 →</text>
+<text x="24" y="1510" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">© 2026 Shawn Deng</text>
+<text x="24" y="1554" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#adb5bf">背景已静止</text>
+<text x="190" y="1554" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#8fadc4">RSS</text>
+<text x="24" y="1602" font-family="JetBrains Mono, Sarasa Term SC, PingFang SC, monospace" font-size="14" font-weight="400" fill="#8fadc4">保持好奇，持续构建。 ↗</text>
+</svg>

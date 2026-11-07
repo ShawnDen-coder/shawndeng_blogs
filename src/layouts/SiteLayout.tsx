@@ -1,5 +1,6 @@
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
+import { SceneProvider, SceneControl } from '../components/background/ScenePreferences'
 import { Arrow } from '../components/Arrow'
 import { ThemeSelect } from '../components/ThemeSelect'
 import { assetUrl, site } from '../lib/site'
@@ -12,12 +13,11 @@ const navigation = [
 ] as const
 
 export function SiteLayout({ children }: { children: ReactNode }) {
-  const [paused, setPaused] = useState(false)
   const matchRoute = useMatchRoute()
   const isLab = !!matchRoute({ to: '/lab/manta', fuzzy: false })
   const isHome = !!matchRoute({ to: '/', fuzzy: false })
   return (
-    <div
+    <SceneProvider><div
       className={
         isHome
           ? 'site-shell site-shell--home'
@@ -36,10 +36,11 @@ export function SiteLayout({ children }: { children: ReactNode }) {
       >
         跳到正文
       </a>
-      <header className="site-header">
+      <header className="site-header" data-scene-protect>
         <Link to="/" className="wordmark" aria-label="Shawn Deng 首页">
           shawn.
         </Link>
+        <ThemeSelect />
         <nav aria-label="主导航">
           <Link to="/" activeOptions={{ exact: true }} activeProps={{ 'aria-current': 'page' }}>首页</Link>
           {navigation.map((item) => (
@@ -53,23 +54,22 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <ThemeSelect />
       </header>
       <main id="main" tabIndex={-1}>
         {children}
       </main>
-      <footer className="site-footer flex flex-wrap items-center justify-between gap-4">
+      <footer className="site-footer flex flex-wrap items-center justify-between gap-4" data-scene-protect>
         <span>
           © {new Date().getFullYear()} {site.name}
         </span>
         <div className="flex items-center gap-5">
-          {isHome && <button className="scene-toggle" onClick={() => { setPaused(!paused); window.dispatchEvent(new Event('scene-toggle')) }}>{paused ? '继续场景' : '暂停场景'}</button>}
+          {isHome && <SceneControl />}
           <a href={assetUrl('feed.xml')}>RSS</a>
           <a href={site.github}>
             保持好奇，持续构建。 <Arrow diagonal />
           </a>
         </div>
       </footer>
-    </div>
+    </div></SceneProvider>
   )
 }

@@ -53,7 +53,7 @@ function RootDocument({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#f5f4f1" />
+        <meta name="theme-color" content="#f4f6f8" />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
         <HeadContent />
       </head>
