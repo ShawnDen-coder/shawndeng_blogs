@@ -1,7 +1,7 @@
 // Development-only visual fixture. The companion server injects the built site styles.
 import fs from 'node:fs'
 import { renderMermaidFences } from './prepare-content.mjs'
-const input = '```mermaid\nflowchart LR\n  A["内容准备"] --> B["构建与检查"] --> C["发布文章"]\n  B --> D["复核图表和颜色"]\n```'
+const input = '```mermaid\nflowchart LR\n  A["内容准备"] --> B["构建与检查"] --> C["发布文章"]\n  B --> D["复核长中文标签与浅色深色图表的阅读和横向滚动"]\n```'
 const encoded = renderMermaidFences(input, 'pele-preview-fixture.md').match(/```pele-svg\n([^\n]+)/)?.[1]
 if (!encoded) throw new Error('Pele did not produce an SVG')
 const svg = Buffer.from(encoded, 'base64').toString()

@@ -1,27 +1,31 @@
 type MotionState = { hidden: boolean; paused: boolean; restricted: boolean; frozen: boolean; still: boolean }
 type LoopOptions = { request: (callback: FrameRequestCallback) => number; cancel: (id: number) => void; draw: (phase: number) => void; interval: () => number; initialPhase: number }
 export function createSceneLoop(options: LoopOptions) {
-  let frame = 0, last: number | null = null, phase = options.initialPhase, disposed = false
+  let frame = 0, lastDraw: number | null = null, lastMotion: number | null = null, phase = options.initialPhase, disposed = false, dirty = false
   let state: MotionState = { hidden: true, paused: false, restricted: false, frozen: false, still: false }
-  const allowed = () => !disposed && !state.hidden && !state.paused && !state.restricted && !state.frozen && !state.still
+  const motion = () => !state.paused && !state.restricted && !state.still
+  const allowed = () => !disposed && !state.hidden && !state.frozen && (motion() || dirty)
+  const schedule = () => { if (!frame && allowed()) frame = options.request(tick) }
   const tick = (now: number) => {
     frame = 0
     if (!allowed()) return
-    if (last === null || now - last >= options.interval()) {
-      if (last !== null) phase += Math.min((now - last) / 1000, .1) * .808
-      last = now
+    if (lastDraw === null || now - lastDraw >= options.interval()) {
+      if (motion() && lastMotion !== null) phase += Math.min((now - lastMotion) / 1000, .1) * .808
+      lastMotion = motion() ? now : null
+      lastDraw = now; dirty = false
       options.draw(phase)
     }
-    if (allowed()) frame = options.request(tick)
+    schedule()
   }
   return {
     update(next: MotionState) {
       state = next
       if (frame) options.cancel(frame)
-      frame = 0; last = null
-      if (allowed()) frame = options.request(tick)
+      frame = 0; lastMotion = null
+      schedule()
     },
-    dispose() { disposed = true; if (frame) options.cancel(frame); frame = 0 },
+    requestRedraw() { dirty = true; schedule() },
+    dispose() { disposed = true; dirty = false; if (frame) options.cancel(frame); frame = 0 },
     phase() { return phase }
   }
 }
@@ -94,5 +98,15 @@ export function createProtectedRenderer(options: { ctx: CanvasRenderingContext2D
       return 'failed'
     },
     dispose() { destroy() }
+  }
+}
+type ControllerOptions = Omit<LoopOptions, 'draw'> & { clear: () => void; measure: () => void; draw: (phase: number) => void; now: () => number; onTiming: (duration: number) => void }
+export function createSceneController(options: ControllerOptions) {
+  let dirty = true
+  const loop = createSceneLoop({ ...options, draw: phase => { const start=options.now(); if (dirty) { options.measure(); dirty = false } options.draw(phase); options.onTiming(options.now()-start) } })
+  return {
+    update: loop.update,
+    invalidate() { dirty = true; options.clear(); loop.requestRedraw() },
+    dispose: loop.dispose
   }
 }
