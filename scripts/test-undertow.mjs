@@ -51,3 +51,38 @@ assert.equal(budget.sample(8, 6), true, 'two slow windows cause a downgrade')
 for (let i=0; i<60; i++) budget.sample(8, 6)
 for (let i=0; i<60; i++) assert.equal(budget.sample(1, 6), false, 'a good window resets consecutive failures')
 console.log('Undertow measured budget windows passed')
+
+// Exercise the same protected drawing controller used by UndertowScene.
+const { createProtectedRenderer } = await import('../src/components/background/scene-runtime.ts')
+let primaryDraws=0, fallbackDraws=0, fallbackCreates=0, primaryDestroyed=0, fallbackDestroyed=0, resets=0, stopped=0
+const broken = { draw() { primaryDraws++; throw Error('lost GPU') }, destroy() { primaryDestroyed++ } }
+const backup = { draw() { fallbackDraws++; if (fallbackDraws > 1) throw Error('2d failure') }, destroy() { fallbackDestroyed++ } }
+const pipeline = createProtectedRenderer({ ctx, reset: () => resets++, fallback: () => { fallbackCreates++; return backup }, stop: () => stopped++ })
+pipeline.setPrimary(broken)
+const geometry = { width:400, height:200, viewportWidth:400, viewportHeight:200, rects:null }
+assert.equal(pipeline.draw(geometry, 31, false), 'unready')
+assert.equal(primaryDraws, 0); assert.equal(fallbackCreates, 0)
+geometry.rects=[{left:50,top:40,width:100,height:30}]
+assert.equal(pipeline.draw(geometry, 31, false), 'drawn')
+assert.equal(primaryDestroyed, 1); assert.equal(fallbackCreates, 1); assert.equal(fallbackDraws, 1); assert.equal(resets, 1)
+assert.equal(pipeline.draw(geometry, 32, false), 'failed')
+assert.equal(fallbackDestroyed, 1); assert.equal(stopped, 1); assert.equal(resets, 2)
+assert.equal(pipeline.draw(geometry, 33, false), 'failed')
+assert.equal(fallbackCreates, 1); assert.equal(stopped, 1)
+pipeline.dispose()
+console.log('Protected renderer runtime failure and cleanup passed')
+const { createCanvasRenderer } = await import('../src/components/background/undertow-renderer.ts')
+const oldDocument=globalThis.document
+const makeContext=()=>({ createLinearGradient:()=>({addColorStop(){}}), fillRect(){}, set fillStyle(value) {} })
+globalThis.document={createElement:()=>({width:0,height:0,getContext:()=>makeContext()})}
+const canvasRenderer=createCanvasRenderer(false,false,10000)
+let alpha=1, images=[]
+const renderContext={save(){},restore(){},fillRect(){},set fillStyle(value){},set globalAlpha(value){alpha=value},drawImage(...args){images.push({alpha,args})}}
+canvasRenderer.draw(renderContext,800,500,0,false)
+const firstAlphas=images.slice(1).map(x=>x.alpha)
+assert.equal(images.length,3,'base and two foam layers are composited')
+images=[]; canvasRenderer.draw(renderContext,800,500,1/(2*.026),false)
+const secondAlphas=images.slice(1).map(x=>x.alpha)
+assert.ok(firstAlphas[0] < secondAlphas[0] && firstAlphas[1] > secondAlphas[1], 'swell layers alternate half a cycle apart')
+canvasRenderer.destroy(); globalThis.document=oldDocument
+console.log('Canvas renderer cached alternating foam layers passed')

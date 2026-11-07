@@ -473,3 +473,8 @@ h1 {
 @media(max-width:767px) { :root { --site-frame:420px; --page-gutter:24px; } .profile-layout { display:block; } .profile-content { margin-top:48px; } .profile-intro h1,.profile-name { font-size:28px; } .profile-intro h1 span,.profile-name span { font-size:16px; line-height:24px; } .profile-links { flex-direction:row; flex-wrap:wrap; gap:0 24px; } .site-header nav { gap:0 12px; justify-content:space-between; } .site-shell main,.site-shell--home main { padding-block:32px 24px; } }
 @media(max-width:340px) { :root { --page-gutter:20px; } }
 @media(forced-colors:active) { .scene-canvas { display:none; } }
+
+/* Footer actions remain reachable when text wraps or zooms. */
+.footer-actions { display:flex; flex-wrap:wrap; align-items:center; gap:0 20px; min-width:0; }
+.footer-actions a, .footer-actions button, .footer-actions .scene-toggle { display:inline-flex; align-items:center; min-height:44px; max-width:100%; overflow-wrap:anywhere; }
+.site-footer > span { overflow-wrap:anywhere; }

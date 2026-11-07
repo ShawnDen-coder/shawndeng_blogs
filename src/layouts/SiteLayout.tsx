@@ -62,7 +62,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         <span>
           © {new Date().getFullYear()} {site.name}
         </span>
-        <div className="flex items-center gap-5">
+        <div className="footer-actions">
           {isHome && <SceneControl />}
           <a href={assetUrl('feed.xml')}>RSS</a>
           <a href={site.github}>

@@ -60,3 +60,39 @@ export function createBudgetTracker() {
     return true
   } }
 }
+type RenderTarget = { draw: (ctx: CanvasRenderingContext2D, width: number, height: number, phase: number, dark: boolean) => void; destroy: () => void }
+type Geometry = Omit<PaintOptions, 'paint'>
+export function createProtectedRenderer(options: { ctx: CanvasRenderingContext2D; reset: () => void; fallback: () => RenderTarget | null; stop: () => void; primaryFailed?: () => void }) {
+  let current: RenderTarget | null = null, primary = false, terminal = false
+  const destroy = () => { const previous = current; current = null; try { previous?.destroy() } catch { /* Continue to the safe fallback. */ } }
+  const fail = () => { terminal = true; destroy(); options.reset(); options.stop() }
+  const fallback = () => {
+    if (terminal) return
+    destroy(); options.reset(); options.primaryFailed?.()
+    try { current = options.fallback() } catch { current = null }
+    primary = false
+    if (!current) fail()
+  }
+  return {
+    setPrimary(renderer: RenderTarget) { destroy(); if (!terminal) { current=renderer; primary=true } else renderer.destroy() },
+    setFallback(renderer: RenderTarget) { destroy(); if (!terminal) { current=renderer; primary=false } else renderer.destroy() },
+    hasRenderer() { return current !== null && !terminal },
+    primaryLost() { if (current && primary) fallback() },
+    draw(geometry: Geometry, phase: number, dark: boolean): 'unready' | 'drawn' | 'failed' {
+      const { rects, viewportWidth, viewportHeight } = geometry
+      if (!rects?.length || !viewportWidth || !viewportHeight || rects.some(r => ![r.left,r.top,r.width,r.height].every(Number.isFinite))) {
+        options.ctx.clearRect(0,0,geometry.width,geometry.height); return 'unready'
+      }
+      if (!current || terminal) return 'failed'
+      const attempt = () => {
+        const active = current!
+        try { return paintProtected(options.ctx, { ...geometry, paint: () => active.draw(options.ctx,geometry.width,geometry.height,phase,dark) }) } catch { return false }
+      }
+      if (attempt()) return 'drawn'
+      if (primary) { fallback(); if (current && attempt()) return 'drawn' }
+      if (!terminal) fail()
+      return 'failed'
+    },
+    dispose() { destroy() }
+  }
+}
