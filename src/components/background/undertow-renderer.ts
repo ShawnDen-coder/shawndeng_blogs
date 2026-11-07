@@ -35,7 +35,10 @@ export function createCanvasRenderer(mobile: boolean, low: boolean, budget = CAN
   const a=base.getContext('2d'), b=swell.getContext('2d'); if (!a || !b) return null
   const gradient=a.createLinearGradient(0,0,0,height); gradient.addColorStop(0,'#e0e7eb'); gradient.addColorStop(.47,'#c6d3da'); gradient.addColorStop(.50,'#f4f8fa'); gradient.addColorStop(.53,'#8ba3b0'); gradient.addColorStop(1,'#607e8d'); a.fillStyle=gradient; a.fillRect(0,0,width,height)
   // A deterministic cached texture avoids runtime noise generation and external assets.
-  for (let y=0;y<height;y+=6) for(let x=0;x<width;x+=6) { const n=Math.abs(Math.sin(x*12.9898+y*78.233)*43758.5453)%1; const band=Math.max(0,1-Math.abs(y/height-.5)/.22); b.fillStyle=`rgba(235,245,248,${n*band*.35})`; b.fillRect(x,y,6,6) }
+  for (let y=0;y<height;y+=6) {
+    if (y % 24 === 0 && performance.now()-started > budget) { base.width=0; swell.width=0; return null }
+    for(let x=0;x<width;x+=6) { const n=Math.abs(Math.sin(x*12.9898+y*78.233)*43758.5453)%1; const band=Math.max(0,1-Math.abs(y/height-.5)/.22); b.fillStyle=`rgba(235,245,248,${n*band*.35})`; b.fillRect(x,y,6,6) }
+  }
   if (performance.now()-started > budget) { base.width=0; swell.width=0; return null }
   return { draw(ctx,w,h,t,dark) {
     ctx.save()

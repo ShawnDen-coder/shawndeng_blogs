@@ -86,3 +86,37 @@ const secondAlphas=images.slice(1).map(x=>x.alpha)
 assert.ok(firstAlphas[0] < secondAlphas[0] && firstAlphas[1] > secondAlphas[1], 'swell layers alternate half a cycle apart')
 canvasRenderer.destroy(); globalThis.document=oldDocument
 console.log('Canvas renderer cached alternating foam layers passed')
+let pending=new Map(), nextFrame=0, measurements=0, painted=0
+const coalesced=createSceneLoop({request:fn=>{const id=++nextFrame;pending.set(id,fn);return id},cancel:id=>pending.delete(id),interval:()=>100,initialPhase:31,draw:()=>{measurements++;painted++}})
+const fire=now=>{const callbacks=[...pending.values()];pending.clear();callbacks.forEach(fn=>fn(now))}
+coalesced.update({hidden:false,paused:true,restricted:false,frozen:false,still:false})
+for(let i=0;i<30;i++) coalesced.requestRedraw()
+assert.equal(pending.size,1);fire(1000);assert.equal(measurements,1)
+for(let i=0;i<30;i++) coalesced.requestRedraw()
+fire(1016);assert.equal(painted,1,'scroll bursts cannot bypass the frame interval')
+fire(1100);assert.equal(painted,2);assert.equal(pending.size,0,'static redraw does not leave an animation loop')
+coalesced.update({hidden:true,paused:true,restricted:false,frozen:false,still:false});coalesced.requestRedraw();assert.equal(pending.size,0)
+coalesced.dispose()
+console.log('Coalesced static measurement and frame pacing passed')
+let generated=0, clock=0
+const previousPerformance=globalThis.performance, previousDocument=globalThis.document
+globalThis.performance={now:()=>{clock+=10;return clock}}
+globalThis.document={createElement:()=>({width:0,height:0,getContext:()=>({createLinearGradient:()=>({addColorStop(){}}),fillRect(){generated++},set fillStyle(value){}})})}
+assert.equal(createCanvasRenderer(false,false,40),null,'slow cache initialization must abort')
+assert.ok(generated<5000,'budget is checked while generating, not only afterward')
+globalThis.performance=previousPerformance;globalThis.document=previousDocument
+console.log('Canvas initialization budget abort passed')
+const { createSceneController } = await import('../src/components/background/scene-runtime.ts')
+let frames=new Map(), sequence=0, geometryReads=0, renderCalls=0, samples=0, timed=0
+const actualPipeline=createProtectedRenderer({ctx,reset(){},fallback:()=>null,stop(){}})
+actualPipeline.setPrimary({draw(){renderCalls++},destroy(){}})
+const geometry2={width:400,height:200,viewportWidth:400,viewportHeight:200,rects:[{left:10,top:10,width:100,height:50}]}
+const controller=createSceneController({request:fn=>{const id=++sequence;frames.set(id,fn);return id},cancel:id=>frames.delete(id),interval:()=>100,initialPhase:31,clear(){},now:()=>10,onTiming:()=>timed++,measure(){geometryReads++},draw:phase=>{actualPipeline.draw(geometry2,phase,false);samples++}})
+const runFrame=now=>{const callbacks=[...frames.values()];frames.clear();callbacks.forEach(fn=>fn(now))}
+controller.update({hidden:false,paused:true,restricted:false,frozen:false,still:false})
+for(let i=0;i<50;i++)controller.invalidate()
+runFrame(1000);assert.equal(geometryReads,1);assert.equal(renderCalls,1);assert.equal(samples,1)
+for(let i=0;i<50;i++)controller.invalidate()
+runFrame(1016);assert.equal(renderCalls,1);runFrame(1100);assert.equal(geometryReads,2);assert.equal(renderCalls,2);assert.equal(samples,2);assert.equal(timed,2)
+controller.dispose();actualPipeline.dispose()
+console.log('Product controller and protected renderer integration passed')

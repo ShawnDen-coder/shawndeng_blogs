@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useScenePreferences } from './ScenePreferences'
-import { createBudgetTracker, createSceneLoop, createProtectedRenderer } from './scene-runtime'
+import { createBudgetTracker, createSceneController, createProtectedRenderer } from './scene-runtime'
 import { createCanvasRenderer, createWebGLRenderer } from './undertow-renderer'
 
 export function UndertowScene() {
@@ -22,23 +22,22 @@ export function UndertowScene() {
       fallback: () => createCanvasRenderer(innerWidth<768,quality==='low'),
       primaryFailed: () => { gpuLostRef.current = true },
       stop: () => { failedRef.current = true; setQuality('failed'); schedule() } })
-    const draw = (phase: number, timed = false) => {
+    const draw = (phase: number) => {
       phaseRef.current = phase
-      if (!ready || !pipeline.hasRenderer() || disposed) { clear(); return }
-      const start = performance.now()
+      if (!pipeline.hasRenderer() || disposed) { clear(); return }
+      if (!ready) { clear(); return }
       const result = pipeline.draw({ width:canvas.width, height:canvas.height, viewportWidth:innerWidth, viewportHeight:innerHeight, rects }, phase, document.documentElement.dataset.theme === 'dark')
       if (result !== 'drawn') return
       canvas.style.opacity=String(.34*(1-.55*Math.min(scrollY/(innerHeight*1.4),1)))
-      if (timed && budget.sample(performance.now()-start, innerWidth<768?4:6)) setQuality(quality==='high'?'medium':quality==='medium'?'low':'still')
     }
-    const loop = createSceneLoop({ request: callback => window.requestAnimationFrame(callback), cancel: id => window.cancelAnimationFrame(id), interval: () => innerWidth<768?1000/12:1000/15, initialPhase:phaseRef.current, draw: phase => draw(phase,true) })
-    const schedule = () => loop.update({ hidden: document.hidden, paused:userPaused, restricted, frozen, still:(quality==='still' || quality==='failed') || !pipeline.hasRenderer() })
+    const controller = createSceneController({ request: callback => window.requestAnimationFrame(callback), cancel: id => window.cancelAnimationFrame(id), interval: () => innerWidth<768?1000/12:1000/15, initialPhase:phaseRef.current, draw, clear, now: () => performance.now(),
+      onTiming: duration => { if (!failedRef.current && budget.sample(duration,innerWidth<768?4:6) && quality!=='still' && quality!=='failed') setQuality(quality==='high'?'medium':quality==='medium'?'low':'still') },
+      measure: () => { const elements=Array.from(document.querySelectorAll('[data-scene-protect]')); rects=elements.map(el=>el.getBoundingClientRect()); ready=elements.length>=4 && rects.every(r=>[r.left,r.top,r.width,r.height].every(Number.isFinite)) } })
+    const schedule = () => controller.update({ hidden: document.hidden, paused:userPaused, restricted, frozen, still:(quality==='still' || quality==='failed') || !pipeline.hasRenderer() })
     const measure = () => {
       if (disposed) return
-      const elements = Array.from(document.querySelectorAll('[data-scene-protect]'))
-      rects = elements.map(el => el.getBoundingClientRect())
-      ready = elements.length >= 4 && rects.every(r => [r.left,r.top,r.width,r.height].every(Number.isFinite))
-      draw(loop.phase())
+      ready = false
+      if (pipeline.hasRenderer()) controller.invalidate(); else clear()
     }
     const lost = () => {
       if (disposed) return
@@ -70,7 +69,7 @@ export function UndertowScene() {
     const observer = new ResizeObserver(measure)
     document.querySelectorAll('[data-scene-protect]').forEach(element => observer?.observe(element))
     document.fonts?.ready.then(()=>{if(!disposed) measure()})
-    return () => { disposed=true; loop.dispose(); pipeline.dispose(); mutation.disconnect(); observer?.disconnect(); window.removeEventListener('resize',resize); window.removeEventListener('scroll',measure); document.removeEventListener('visibilitychange',onVisibility); window.removeEventListener('scene-freeze',onFreeze); window.removeEventListener('scene-unfreeze',onUnfreeze); window.removeEventListener('scene-redraw',measure) }
+    return () => { disposed=true; controller.dispose(); pipeline.dispose(); mutation.disconnect(); observer?.disconnect(); window.removeEventListener('resize',resize); window.removeEventListener('scroll',measure); document.removeEventListener('visibilitychange',onVisibility); window.removeEventListener('scene-freeze',onFreeze); window.removeEventListener('scene-unfreeze',onUnfreeze); window.removeEventListener('scene-redraw',measure) }
   }, [userPaused,quality,restricted,setQuality])
   return <canvas ref={ref} className="scene-canvas" aria-hidden="true" />
 }
