@@ -13,7 +13,7 @@ export function applyTheme(preference: ThemePreference) {
     : preference
   document.documentElement.dataset.theme = theme
   document.querySelector('meta[name="theme-color"]')?.setAttribute(
-    'content', theme === 'dark' ? '#1a1917' : '#f5f4f1'
+    'content', theme === 'dark' ? '#0c0e11' : '#f4f6f8'
   )
 }
 

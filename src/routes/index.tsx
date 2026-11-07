@@ -1,56 +1,19 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { SharkScene } from '../components/shark/SharkScene'
-import { useEffect, useState } from 'react'
+import { UndertowScene } from '../components/background/UndertowScene'
+import { PostList } from '../components/PostList'
+import { ProfileLayout } from '../layouts/ProfileLayout'
 import { pageHead } from '../lib/seo'
-import { site } from '../lib/site'
 
 export const Route = createFileRoute('/')({
-  head: () =>
-    pageHead(
-      '邓辉 · Shawn',
-      '从影视后期到创作工具、平台与 AI。喜欢深入解决难题，做些真正能帮上忙的东西。',
-      '/'
-    ),
+  head: () => pageHead('邓辉 · Shawn', '从影视后期到创作工具、平台与 AI。喜欢深入解决难题，做些真正能帮上忙的东西。', '/'),
   component: Home
 })
-
 function Home() {
-  const [paused, setPaused] = useState(false)
-  useEffect(() => {
-    const toggle = () => setPaused(value => !value)
-    window.addEventListener('scene-toggle', toggle)
-    return () => window.removeEventListener('scene-toggle', toggle)
-  }, [])
-  return (
-    <>
-    <section className="ocean-home" aria-labelledby="intro-title">
-      <SharkScene paused={paused} />
-      <div className="ocean-intro">
-        <h1 id="intro-title">
-          你好，我是邓辉<span className="ocean-name">Shawn.</span>
-        </h1>
-        <div className="ocean-copy">
-          <p>
-            从<Link to="/about">影视后期</Link>出发，现在构建
-            <Link to="/projects">创作工具、平台与 AI 工作流</Link>。
-          </p>
-          <p>
-            喜欢把难题弄明白，做些真正能帮上忙的东西。
-          </p>
-        </div>
-        <div className="ocean-links">
-          <a href={site.github} target="_blank" rel="noreferrer">
-            GitHub <span aria-hidden="true">↗</span>
-          </a>
-          <Link to="/about">
-            更多关于我 <span aria-hidden="true">↗</span>
-          </Link>
-          <Link to="/resume">
-            查看简历 <span aria-hidden="true">↗</span>
-          </Link>
-        </div>
-      </div>
+  return <><UndertowScene/><ProfileLayout home>
+    <section className="home-section"><h2>正在构建</h2>
+      <a className="home-project" href="https://github.com/ShawnDen-coder/shawndeng_blogs" target="_blank" rel="noreferrer"><h3>这个个人网站 <span aria-hidden="true">↗</span></h3><p>用代码整理自己的经历、项目与文字。也把构建过程，作为一次持续的工程实践。</p><p className="project-stack">React / TanStack Start / Tailwind CSS</p></a>
+      <Link className="section-link" to="/projects">项目页 <span aria-hidden="true">→</span></Link>
     </section>
-    </>
-  )
+    <section className="home-section"><h2>技术文章</h2><p>动手实践中的记录，和解决问题时留下的思考。</p><PostList limit={3}/><Link className="section-link" to="/posts">全部文章 <span aria-hidden="true">→</span></Link></section>
+  </ProfileLayout></>
 }

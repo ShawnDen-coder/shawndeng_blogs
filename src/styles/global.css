@@ -27,20 +27,20 @@
 }
 :root {
   color-scheme: light dark;
-  --ui-bg-page: light-dark(#f5f4f1, #1a1917);
-  --ui-bg-header: light-dark(#eae8e3, #141311);
-  --ui-bg-elevated: light-dark(#eeece7, #242320);
-  --ui-bg-soft: light-dark(#e6e3dc, #2b2925);
-  --ui-bg-muted: light-dark(#dcd8cf, #36332e);
-  --ui-text-primary: light-dark(#262523, #fff7f0);
-  --ui-text-secondary: light-dark(#494640, #d2cbc2);
-  --ui-text-muted: light-dark(#6e685f, #aaa298);
-  --ui-accent: light-dark(#a74323, #e86038);
-  --ui-accent-hover: light-dark(#873619, #f08d68);
-  --ui-text-on-accent: light-dark(#fffaf5, #1a1917);
-  --ui-info: light-dark(#9d4326, #e9a184);
-  --ui-accent-soft: light-dark(rgb(167 67 35 / 12%), rgb(232 96 56 / 18%));
-  --ui-border: light-dark(rgb(38 37 35 / 14%), rgb(255 247 240 / 12%));
+  --ui-bg-page: light-dark(#f4f6f8, #0c0e11);
+  --ui-bg-header: light-dark(#e9edf1, #08090c);
+  --ui-bg-elevated: light-dark(#fbfcfd, #1a1f26);
+  --ui-bg-soft: light-dark(#e9edf1, #1a1f26);
+  --ui-bg-muted: light-dark(#dde5ec, #1c242c);
+  --ui-text-primary: light-dark(#1a2028, #e8ebee);
+  --ui-text-secondary: light-dark(#4a5560, #adb5bf);
+  --ui-text-muted: light-dark(#67727d, #838c97);
+  --ui-accent: light-dark(#4a6a80, #98b0c2);
+  --ui-accent-hover: light-dark(#43667f, #e8ebee);
+  --ui-text-on-accent: light-dark(#fbfcfd, #0c0e11);
+  --ui-info: light-dark(#43667f, #8fadc4);
+  --ui-accent-soft: light-dark(rgb(74 106 128 / 12%), rgb(152 176 194 / 18%));
+  --ui-border: light-dark(#cdd5dc, #2a323c);
   --site-frame: 1120px;
   --reading-width: 760px;
   --page-gutter: 48px;
@@ -439,3 +439,37 @@ h1 {
 }
 .pele-diagram svg { max-width: none !important; display: block; }
 .pele-diagram svg text { font-size: max(14px, 1em); }
+
+:root { --site-frame: 980px; --page-gutter: 48px; --scene-pigment-alt: light-dark(#914d5e,#c49aa4); }
+.site-header { display:grid; grid-template-columns:1fr auto; gap:0 24px; padding-top:32px; }
+.site-header nav { grid-column:1 / -1; grid-row:2; justify-content:space-between; flex-wrap:wrap; gap:0 16px; }
+.site-header .theme-control { grid-column:2; grid-row:1; }
+.site-shell main, .site-shell--home main { display:block; width:min(var(--site-frame),calc(100% - var(--page-gutter)*2)); padding-block:48px 32px; }
+.site-shell--lab main { width:min(1120px,calc(100% - var(--page-gutter)*2)); }
+.site-shell:has(.article-body) main { width:min(760px,calc(100% - var(--page-gutter)*2)); }
+.profile-layout { display:grid; grid-template-columns:280px minmax(0,1fr); gap:96px; align-items:start; }
+.profile-intro h1, .profile-name { margin:0; color:var(--ui-text-primary); font-size:32px; font-weight:600; line-height:1.375; letter-spacing:-1px; }
+.profile-intro h1 span, .profile-name span { display:block; font-size:24px; line-height:32px; }
+.profile-copy { margin-top:24px; }
+.profile-copy p { margin:0 0 16px; }
+.profile-copy a, .about-copy a { color:var(--ui-info); text-decoration:underline; text-underline-offset:3px; }
+.profile-links { display:flex; flex-direction:column; margin-top:24px; }
+.profile-links a { display:flex; align-items:center; gap:8px; min-height:44px; color:var(--ui-text-primary); }
+.home-section + .home-section { margin-top:64px; }
+.home-section h2 { font-size:20px; line-height:30px; margin:0 0 24px; }
+.home-section h3 { font-size:18px; margin:0; }
+.home-section p { margin:16px 0; }
+.home-project { display:block; }
+.home-project p { color:var(--ui-text-secondary); }
+.home-project .project-stack { font-size:14px; }
+.section-link { display:inline-block; margin-top:24px; color:var(--ui-info); }
+.post-row { padding:24px 0; }
+.post-row h3 { font-size:18px; }
+.post-row time { font-size:14px; color:var(--ui-text-secondary); }
+.post-row p { font-size:16px; }
+.scene-canvas { position:fixed; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; opacity:.34; }
+@media(min-width:1024px) { :root { --page-gutter:80px; } }
+@media(min-width:768px) and (max-width:1023px) { :root { --site-frame:900px; } .profile-layout { grid-template-columns:250px minmax(0,1fr); gap:64px; } }
+@media(max-width:767px) { :root { --site-frame:420px; --page-gutter:24px; } .profile-layout { display:block; } .profile-content { margin-top:48px; } .profile-intro h1,.profile-name { font-size:28px; } .profile-intro h1 span,.profile-name span { font-size:16px; line-height:24px; } .profile-links { flex-direction:row; flex-wrap:wrap; gap:0 24px; } .site-header nav { gap:0 12px; justify-content:space-between; } .site-shell main,.site-shell--home main { padding-block:32px 24px; } }
+@media(max-width:340px) { :root { --page-gutter:20px; } }
+@media(forced-colors:active) { .scene-canvas { display:none; } }
