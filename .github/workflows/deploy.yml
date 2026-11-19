@@ -5,6 +5,10 @@ on:
   push:
     branches: ["main"]
 
+  # Refresh the static contribution calendar even when no new article is published.
+  schedule:
+    - cron: '23 2 * * *'
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -34,6 +38,8 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Refresh public GitHub contribution calendar
+        run: node scripts/refresh-contributions.mjs
       - name: Build and validate static pages
         run: npm run build
       - name: Upload artifact

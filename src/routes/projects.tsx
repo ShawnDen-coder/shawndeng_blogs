@@ -1,4 +1,3 @@
-import { ProfileLayout } from '../layouts/ProfileLayout'
 import { createFileRoute } from '@tanstack/react-router'
 import { pageHead } from '../lib/seo'
 import { Arrow } from '../components/Arrow'
@@ -10,7 +9,7 @@ export const Route = createFileRoute('/projects')({
 
 function Projects() {
   return (
-    <ProfileLayout><section className="inner-page">
+    <section className="inner-page">
       <h1>项目</h1>
       <p className="page-lede">动手构建，也持续打磨。</p>
       <a
@@ -28,6 +27,6 @@ function Projects() {
         </p>
         <p className="project-stack">React / TanStack Start / Tailwind CSS</p>
       </a>
-    </section></ProfileLayout>
+    </section>
   )
 }
