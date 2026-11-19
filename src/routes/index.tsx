@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ContributionCalendar } from '../components/ContributionCalendar'
+import { PersonalIntroduction, introductionSummary } from '../components/PersonalIntroduction'
 import { PostList } from '../components/PostList'
 import { pageHead } from '../lib/seo'
 import { site } from '../lib/site'
 
 export const Route = createFileRoute('/')({
-  head: () => pageHead('首页', '为个人工作流构建实用工具和自托管基础设施，用 Python 自动化，以 GitOps 管理 Homelab。', '/'),
+  head: () => pageHead('首页', introductionSummary, '/'),
   component: Home
 })
 
@@ -29,8 +30,8 @@ function Home() {
           </nav>
         </div>
         <ContributionCalendar />
-        <p>我为自己的工作流构建实用工具和自托管基础设施。</p>
-        <p>我用 Python 做自动化，用 GitOps 管理 Homelab，也探索 AI Agent 和 Rust。<Link to="/about" className="inline-link">关于我</Link></p>
+        <PersonalIntroduction />
+        <p className="intro-about"><Link to="/about" className="inline-link">关于我</Link></p>
       </header>
       <section className="recent-writing" aria-labelledby="recent-writing">
         <h2 id="recent-writing" lang="en">Writing</h2>
