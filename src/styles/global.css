@@ -366,6 +366,11 @@ h1 {
 .profile-socials a:is(:hover, :focus-visible) { color: var(--ui-text-primary); }
 .journal-intro p { max-width: 36em; font-size: 17px; line-height: 1.85; text-wrap: pretty; }
 .journal-intro p + p { margin-top: 10px; }
+.journal-intro .home-introduction { max-width: 66ch; }
+.journal-intro .home-introduction p { max-width: none; font-size: 16px; line-height: 1.65; overflow-wrap: break-word; }
+.journal-intro .home-introduction p + p { margin-top: 24px; }
+.journal-intro .home-introduction p:first-child { color: var(--ui-text-primary); font-size: 17px; }
+.journal-intro .home-introduction p:last-child { color: var(--ui-text-primary); font-weight: 500; }
 .journal-intro .intro-about { margin-top: 10px; }
 .inline-link { color: var(--ui-info); text-decoration: underline; text-underline-offset: .22em; white-space: nowrap; }
 .journal h2 { font-size: 27px; line-height: 1.25; }

@@ -30,7 +30,7 @@ function Home() {
           </nav>
         </div>
         <ContributionCalendar />
-        <PersonalIntroduction />
+        <PersonalIntroduction className="home-introduction" />
         <p className="intro-about"><Link to="/about" className="inline-link">关于我</Link></p>
       </header>
       <section className="recent-writing" aria-labelledby="recent-writing">
