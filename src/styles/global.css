@@ -296,9 +296,14 @@ h1 {
   gap: 24px;
 }
 .site-header { justify-content: space-between; padding-block: 26px; }
-.site-header--home { position: relative; height: 0; padding: 0; }
+.site-header--home { position: relative; width: 100%; height: 0; padding: 0; }
 .site-header--home .theme-toggle {
-  position: absolute; top: var(--home-inset); right: 0; z-index: 1;
+  --corner-inset: clamp(8px, 2vw, 24px);
+  position: absolute;
+  top: max(var(--corner-inset), env(safe-area-inset-top));
+  right: max(var(--corner-inset), env(safe-area-inset-right));
+  margin: 0;
+  z-index: 1;
 }
 .site-shell { --home-inset: 72px; }
 .footer-actions { display: flex; align-items: center; }
