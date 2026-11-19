@@ -32,6 +32,7 @@ function Home() {
       <section className="recent-writing" aria-labelledby="recent-writing">
         <h2 id="recent-writing" lang="en">Writing</h2>
         <PostList />
+        <Link className="all-writing" to="/posts" lang="en">All writing <span aria-hidden="true">→</span></Link>
       </section>
       <ContributionCalendar />
     </div>
