@@ -15,7 +15,7 @@
 
 ## 版面与索引
 
-首页只署名 Shawn Deng，主题按钮与署名同排。栏目入口放在对应内容旁；内页页首提供返回首页的入口。桌面首页采用 660px 单栏，姓名、经历、文章与贡献图共用一条左边线。手机沿用这个阅读顺序。Writing 索引保留现有 `/posts/` 地址，使用文章元数据按年份倒序分组，每行显示标题和月日。[首页参考](https://paco.me/) · [索引参考](https://paco.me/writing)
+首页只署名 Shawn Deng，主题按钮位于页面右上角，在手机上避开屏幕安全区。栏目入口放在对应内容旁；内页页首提供返回首页的入口。桌面首页采用 660px 单栏，姓名、经历、文章与贡献图共用一条左边线。手机沿用这个阅读顺序。Writing 索引保留现有 `/posts/` 地址，使用文章元数据按年份倒序分组，每行显示标题和月日。[首页参考](https://paco.me/) · [索引参考](https://paco.me/writing)
 
 贡献日历随页面静态生成，访客直接读取本站内容。数据取自 [GitHub 公开贡献日历](https://github.com/users/ShawnDen-coder/contributions)。本地执行 `node scripts/refresh-contributions.mjs` 可更新快照。Pages 工作流在构建前获取最新数据，并配置每日 UTC 02:23 触发；获取失败时保留已发布的站点。
 
