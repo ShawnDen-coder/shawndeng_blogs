@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ContributionCalendar } from '../components/ContributionCalendar'
 import { PersonalIntroduction, introductionSummary } from '../components/PersonalIntroduction'
-import { PostList } from '../components/PostList'
 import { pageHead } from '../lib/seo'
 import { site } from '../lib/site'
 
@@ -33,11 +32,6 @@ function Home() {
         <PersonalIntroduction className="home-introduction" />
         <p className="intro-about"><Link to="/about" className="inline-link">关于我</Link></p>
       </header>
-      <section className="recent-writing" aria-labelledby="recent-writing">
-        <h2 id="recent-writing" lang="en">Writing</h2>
-        <PostList />
-        <Link className="all-writing" to="/posts" lang="en">All writing <span aria-hidden="true">→</span></Link>
-      </section>
     </div>
   )
 }
