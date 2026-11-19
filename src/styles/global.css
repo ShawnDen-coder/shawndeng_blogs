@@ -391,7 +391,8 @@ h1 {
   .writing-archive:is(:hover, :has(.journal-entry:focus-visible)) .journal-entry:is(:hover, :focus-visible) { opacity: 1; transition: none; }
 }
 
-.contributions { --calendar-gap: clamp(1.5px, .27vw, 3px); }
+.contributions { --calendar-gap: clamp(1.5px, .27vw, 3px); margin: 16px 0 40px; }
+.contributions figure { position: relative; }
 .calendar-days, .calendar-months { display: grid; grid-template-columns: repeat(var(--calendar-weeks), minmax(0, 1fr)); column-gap: var(--calendar-gap); }
 .calendar-days { grid-template-rows: repeat(7, auto); grid-auto-flow: column; row-gap: var(--calendar-gap); }
 .calendar-days button {
@@ -403,10 +404,11 @@ h1 {
 .calendar-days [data-level='3'] { background: light-dark(#4c827f, #77a29b); }
 .calendar-days [data-level='4'] { background: light-dark(#295f60, #a0c5b8); }
 .calendar-days button:is(:hover, :focus-visible) { outline: 1.5px solid var(--ui-text-primary); outline-offset: 1px; z-index: 1; }
-.calendar-months, .contributions figcaption { color: var(--ui-text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.calendar-months { color: var(--ui-text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .calendar-months { margin-block: 6px; }
 .calendar-months span { white-space: nowrap; }
-.contributions figcaption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2px 16px; margin-top: 10px; }
+.calendar-detail { position: absolute; top: calc(100% + 6px); left: 0; z-index: 2; padding: 2px 6px; background: var(--ui-bg-elevated); color: var(--ui-text-primary); font-size: 12px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.calendar-detail:empty { display: none; }
 @media (max-width: 767px) {
   :root { --page-gutter: 24px; }
 }
@@ -423,6 +425,7 @@ h1 {
   .writing-year { grid-template-columns: 64px minmax(0, 1fr); }
   .writing-list .journal-entry::before { left: -64px; }
   .calendar-months span:nth-child(even) { visibility: hidden; }
+  .calendar-months span:last-child { transform: translateX(-5px); }
 }
 @media (prefers-reduced-motion: no-preference) {
   @keyframes journal-arrive { from { opacity: .65; transform: translateY(4px); } }

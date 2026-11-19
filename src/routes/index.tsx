@@ -26,6 +26,7 @@ function Home() {
             </svg>
           </a>
         </nav>
+        <ContributionCalendar />
         <p>我从影视后期出发，现在写代码，做创作工具，也探索 AI 工作流。</p>
         <p>这里记录我动手搭建时遇到的问题，从 Docker 到自己的 Homelab。<Link to="/about" className="inline-link">关于我</Link></p>
       </header>
@@ -34,7 +35,6 @@ function Home() {
         <PostList />
         <Link className="all-writing" to="/posts" lang="en">All writing <span aria-hidden="true">→</span></Link>
       </section>
-      <ContributionCalendar />
     </div>
   )
 }
