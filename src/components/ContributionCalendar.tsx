@@ -4,10 +4,11 @@ import calendar from '../../content/github-contributions.json'
 const { days } = calendar
 const firstDay = new Date(days[0].date).getUTCDay()
 const weeks = Math.ceil((days.length + firstDay) / 7)
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const months = days.flatMap((day, index) => {
   const week = Math.floor((index + firstDay) / 7)
   return day.date.endsWith('-01') && week <= weeks - 3
-    ? [{ week, label: `${Number(day.date.slice(5, 7))}月` }]
+    ? [{ week, label: monthNames[Number(day.date.slice(5, 7)) - 1] }]
     : []
 })
 
@@ -30,7 +31,7 @@ export function ContributionCalendar() {
           {months.map(month => <span key={month.week} style={{ gridColumn: month.week + 1 }}>{month.label}</span>)}
         </div>
         <div className="calendar-days" role="group" aria-label="每日贡献，可用方向键浏览" ref={grid}
-          onPointerLeave={() => setSelected(grid.current?.contains(document.activeElement) ? focusDay : null)}
+          onPointerLeave={event => { if (event.pointerType !== 'touch') setSelected(grid.current?.contains(document.activeElement) ? focusDay : null) }}
           onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setSelected(null) }}>
           {days.map((day, index) => (
             <button type="button" key={day.date} data-level={day.level}
@@ -38,14 +39,13 @@ export function ContributionCalendar() {
               aria-label={`${day.date}，${day.count} 次贡献`}
               tabIndex={index === focusDay ? 0 : -1}
               onFocus={() => { setFocusDay(index); setSelected(index) }}
-              onPointerEnter={() => setSelected(index)}
+              onPointerEnter={event => { if (event.pointerType !== 'touch') setSelected(index) }}
               onClick={() => setSelected(index)}
               onKeyDown={event => move(event, index)} />
           ))}
         </div>
-        <figcaption>
-          <span>{active ? `${active.date} · ${active.count} 次贡献` : `过去一年 · ${calendar.total.toLocaleString('en-US')} 次贡献`}</span>
-          <span>截至 <time dateTime={days[days.length - 1].date}>{days[days.length - 1].date}</time></span>
+        <figcaption className="calendar-detail" aria-live="polite">
+          {active ? `${active.date} · ${active.count} 次贡献` : null}
         </figcaption>
       </figure>
     </section>
