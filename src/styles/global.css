@@ -350,21 +350,23 @@ h1 {
   display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 .32em;
   font-size: clamp(40px, 4.5vw, 58px); line-height: 1.15;
 }
-.site-header--home + main { padding-top: var(--home-inset); }
+.site-shell .site-header--home + main { padding-top: var(--home-inset); }
+.profile-identity { display: flex; align-items: flex-end; }
 .journal-intro h1 {
-  padding-inline-end: 48px;
+  flex: none;
   font-family: 'Allura', cursive;
   font-size: clamp(56px, 6vw, 76px);
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.1;
+  white-space: nowrap;
 }
-.profile-socials { display: flex; margin: 6px 0 16px -13px; }
+.profile-socials { display: flex; flex: none; margin: 0 0 -2px; }
 .profile-socials a { display: grid; place-items: center; width: 44px; height: 44px; color: var(--ui-text-secondary); }
 .profile-socials a:is(:hover, :focus-visible) { color: var(--ui-text-primary); }
 .journal-intro p { max-width: 36em; font-size: 17px; line-height: 1.85; text-wrap: pretty; }
 .journal-intro p + p { margin-top: 10px; }
-.inline-link { margin-left: .4em; color: var(--ui-info); text-decoration: underline; text-underline-offset: .22em; }
+.inline-link { margin-left: .4em; color: var(--ui-info); text-decoration: underline; text-underline-offset: .22em; white-space: nowrap; }
 .journal h2 { font-size: 27px; line-height: 1.25; }
 .journal .recent-writing h2 { font-size: 14px; color: var(--ui-text-secondary); }
 .journal-entry time { font-size: 13px; color: var(--ui-text-muted); }
@@ -416,11 +418,11 @@ h1 {
   .site-shell--writing main { padding-top: 0; }
 }
 @media (max-width: 540px) {
-  .site-shell { --home-inset: 38px; }
+  .site-shell { --home-inset: 64px; }
   .site-header:not(.site-header--home) { padding-block: 14px; }
   .site-shell main { padding-block: 36px 40px; }
   .journal { gap: 38px; }
-  .journal-intro h1 { font-size: clamp(46px, 14.35vw, 56px); }
+  .journal-intro h1 { font-size: clamp(36px, 11.25vw, 56px); }
   .journal-intro p { font-size: 16px; }
   .writing-year { grid-template-columns: 64px minmax(0, 1fr); }
   .writing-list .journal-entry::before { left: -64px; }
