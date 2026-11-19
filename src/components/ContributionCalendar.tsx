@@ -25,11 +25,8 @@ export function ContributionCalendar() {
     grid.current?.querySelectorAll('button')[Math.max(0, Math.min(days.length - 1, next))]?.focus()
   }
   return (
-    <section className="contributions" aria-labelledby="contributions-heading">
-      <div className="section-heading">
-        <h2 id="contributions-heading" lang="en">GitHub</h2>
-        <a href={site.github}>@{calendar.login} <span aria-hidden="true">↗</span></a>
-      </div>
+    <section className="contributions" aria-label="GitHub 贡献日历">
+      <a className="calendar-profile" href={site.github}>@{calendar.login} <span aria-hidden="true">↗</span></a>
       <figure style={{ '--calendar-weeks': weeks } as React.CSSProperties}>
         <div className="calendar-months" aria-hidden="true">
           {months.map(month => <span key={month.week} style={{ gridColumn: month.week + 1 }}>{month.label}</span>)}
