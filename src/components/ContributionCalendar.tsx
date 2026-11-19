@@ -1,6 +1,5 @@
 import { useRef, useState, type KeyboardEvent } from 'react'
 import calendar from '../../content/github-contributions.json'
-import { site } from '../lib/site'
 
 const { days } = calendar
 const firstDay = new Date(days[0].date).getUTCDay()
@@ -26,7 +25,6 @@ export function ContributionCalendar() {
   }
   return (
     <section className="contributions" aria-label="GitHub 贡献日历">
-      <a className="calendar-profile" href={site.github}>@{calendar.login} <span aria-hidden="true">↗</span></a>
       <figure style={{ '--calendar-weeks': weeks } as React.CSSProperties}>
         <div className="calendar-months" aria-hidden="true">
           {months.map(month => <span key={month.week} style={{ gridColumn: month.week + 1 }}>{month.label}</span>)}
