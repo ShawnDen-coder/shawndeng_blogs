@@ -371,11 +371,9 @@ h1 {
 .writing-list--archive .journal-entry > span:first-child { overflow-wrap: anywhere; }
 .journal-entry time { flex-shrink: 0; font-variant-numeric: tabular-nums; }
 @media (hover: hover) {
-  .writing-archive:hover .journal-entry { opacity: .4; }
-  .writing-archive:hover .journal-entry:hover { opacity: 1; }
+  .writing-archive:is(:hover, :focus-within) .journal-entry { opacity: .4; }
+  .writing-archive:is(:hover, :focus-within) .journal-entry:is(:hover, :focus-visible) { opacity: 1; transition: none; }
 }
-.writing-archive:focus-within .journal-entry { opacity: .4; }
-.writing-archive:focus-within .journal-entry:focus-visible { opacity: 1; }
 
 .contributions { --calendar-gap: clamp(1.5px, .27vw, 3px); }
 .calendar-days, .calendar-months { display: grid; grid-template-columns: repeat(var(--calendar-weeks), minmax(0, 1fr)); column-gap: var(--calendar-gap); }
