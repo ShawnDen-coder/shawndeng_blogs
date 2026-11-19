@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { ContributionCalendar } from '../components/ContributionCalendar'
 import { PersonalIntroduction, introductionSummary } from '../components/PersonalIntroduction'
 import { pageHead } from '../lib/seo'
@@ -30,7 +30,6 @@ function Home() {
         </div>
         <ContributionCalendar />
         <PersonalIntroduction className="home-introduction" />
-        <p className="intro-about"><Link to="/about" className="inline-link">关于我</Link></p>
       </header>
     </div>
   )
