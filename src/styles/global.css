@@ -351,7 +351,7 @@ h1 {
   font-size: clamp(40px, 4.5vw, 58px); line-height: 1.15;
 }
 .site-shell .site-header--home + main { padding-top: var(--home-inset); }
-.profile-identity { display: flex; align-items: flex-end; }
+.profile-identity { display: flex; align-items: flex-end; justify-content: space-between; }
 .journal-intro h1 {
   flex: none;
   font-family: 'Allura', cursive;
