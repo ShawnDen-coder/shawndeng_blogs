@@ -6,7 +6,7 @@ export const Route = createFileRoute('/about')({
   head: () =>
     pageHead(
       '关于我',
-      '了解 Shawn Deng，以及他在 AI Agent、DevOps 与 Homelab 领域的实践。',
+      '了解 Shawn Deng 如何构建自用工具、自托管基础设施，并通过 GitOps 和自动化管理 Homelab。',
       '/about'
     ),
   component: About
@@ -15,18 +15,18 @@ export const Route = createFileRoute('/about')({
 function About() {
   return (
     <section className="inner-page">
-      <h1>你好，我是 Shawn.</h1>
+      <h1>关于我</h1>
       <div className="about-copy space-y-6">
-        <p>我从影视后期出发，现在关注 AI Agent、DevOps 与 Homelab，喜欢通过动手搭建来理解技术。</p>
-        <p>
-          这个网站记录我在容器、Kubernetes、自动化与 AI Agent
-          协作中的实践。我希望把复杂的问题拆开，留下可以复用的命令、判断和经验。
-        </p>
-        <p>
-          你可以从我的<Link to="/posts">技术文章</Link>开始，或在{' '}
-          <a href={site.github}>GitHub ↗</a> 查看代码。
-        </p>
-        <Link className="text-link" to="/resume">简历（整理中）</Link>
+        <div lang="en" className="space-y-6">
+          <p>I build practical tools and self-hosted infrastructure for my own workflows. My main interests are Kubernetes platform engineering, GitOps, DevOps automation, CI/CD, Python tooling, AI agents, and Rust systems programming.</p>
+          <p>I work primarily with Kubernetes, FluxCD, Helm, Kustomize, Docker, GitHub Actions, SOPS, External Secrets, Apache Airflow, and Python. Python is my main language for automation and platform components, while Rust gives me a way to explore command-line tools and lower-level abstractions.</p>
+          <p>Infrastructure as Code is central to how I work. Hosts, Kubernetes resources, Helm releases, application configuration, secrets integration, and operational workflows should be declarative, reproducible, versioned, automated, and recoverable. My homelab is managed like a software project: changes are documented, reviewed, tested, delivered through GitOps, and designed to be rebuilt when necessary.</p>
+          <p>Most of what I build is for personal use, experimentation, and continuous learning. I value small reusable components, clear interfaces, automation over manual work, and documentation, testing, and observability as part of the system.</p>
+          <p>Build it. Automate it. Understand it. 🚀</p>
+        </div>
+        <nav aria-label="更多内容">
+          <p>浏览<Link to="/posts">技术文章</Link>、<a href={site.github}>GitHub ↗</a> 或 <Link to="/resume">简历（整理中）</Link>。</p>
+        </nav>
       </div>
     </section>
   )

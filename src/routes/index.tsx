@@ -5,7 +5,7 @@ import { pageHead } from '../lib/seo'
 import { site } from '../lib/site'
 
 export const Route = createFileRoute('/')({
-  head: () => pageHead('首页', '从影视后期到创作工具，记录代码、Homelab 和 AI 工作流中的实践。', '/'),
+  head: () => pageHead('首页', '为个人工作流构建实用工具和自托管基础设施，用 Python 自动化，以 GitOps 管理 Homelab。', '/'),
   component: Home
 })
 
@@ -27,8 +27,8 @@ function Home() {
           </a>
         </nav>
         <ContributionCalendar />
-        <p>我从影视后期出发，现在写代码，做创作工具，也探索 AI 工作流。</p>
-        <p>这里记录我动手搭建时遇到的问题，从 Docker 到自己的 Homelab。<Link to="/about" className="inline-link">关于我</Link></p>
+        <p>我为自己的工作流构建实用工具和自托管基础设施。</p>
+        <p>我用 Python 做自动化，用 GitOps 管理 Homelab，也探索 AI Agent 和 Rust。<Link to="/about" className="inline-link">关于我</Link></p>
       </header>
       <section className="recent-writing" aria-labelledby="recent-writing">
         <h2 id="recent-writing" lang="en">Writing</h2>
