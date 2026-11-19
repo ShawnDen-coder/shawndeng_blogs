@@ -349,24 +349,33 @@ h1 {
 .journal h2 { font-size: 27px; line-height: 1.25; }
 .journal-entry time { font-size: 13px; color: var(--ui-text-muted); }
 .writing-list { list-style: none; padding: 0; margin: 0; }
-.writing-list li + li { margin-top: 8px; }
 .journal section > h2 { margin-bottom: 13px; }
-.journal-entry {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 20px;
-  padding-block: 4px; color: var(--ui-text-primary);
+.writing-list--recent li { min-height: 84px; }
+.writing-list--recent li + li { margin-top: 24px; }
+.writing-list--recent .journal-entry {
+  display: inline-block; min-height: 44px; padding-block: 8px; margin-block: -8px;
+  color: var(--ui-text-primary); text-decoration: underline;
+  text-decoration-color: var(--ui-border); text-decoration-thickness: 1px;
+  text-underline-offset: 2.5px;
 }
-.journal-entry > span:first-child { overflow-wrap: anywhere; }
-.journal-entry:hover > span:first-child, .journal-entry:focus-visible > span:first-child {
-  text-decoration: underline; text-underline-offset: .25em; text-decoration-thickness: 1px;
-}
-.journal-entry time { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.writing-list--recent .journal-entry:is(:hover, :focus-visible) { text-decoration-color: currentColor; }
 .entry-description { color: var(--ui-text-secondary); font-size: 14px; line-height: 1.65; }
-.section-index { display: inline-flex; align-items: baseline; gap: .4em; }
-.section-index [aria-hidden] { font: 15px/1 system-ui, sans-serif; color: var(--ui-text-muted); }
-.writing-index section { display: grid; grid-template-columns: 78px 1fr; align-items: baseline; gap: 16px; }
-.writing-index section h2 { margin: 0; color: var(--ui-text-secondary); font-size: 21px; font-variant-numeric: lining-nums; }
-.writing-index .journal-entry { min-height: 44px; padding-block: 8px; }
-.writing-index .writing-list li + li { margin: 0; }
+.writing-index { gap: 48px; }
+.writing-archive section { display: grid; grid-template-columns: 25% minmax(0, 1fr); align-items: start; border-top: 1px solid var(--ui-border); }
+.writing-archive section h2 { margin: 0; padding-top: 12px; color: var(--ui-text-muted); font-size: 13px; font-variant-numeric: lining-nums; }
+.writing-list--archive .journal-entry {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 20px;
+  min-height: 44px; padding-block: 12px; color: var(--ui-text-primary);
+}
+.writing-list--archive li + li { border-top: 1px solid var(--ui-border); }
+.writing-list--archive .journal-entry > span:first-child { overflow-wrap: anywhere; }
+.journal-entry time { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+@media (hover: hover) {
+  .writing-archive:hover .journal-entry { opacity: .4; }
+  .writing-archive:hover .journal-entry:hover { opacity: 1; }
+}
+.writing-archive:focus-within .journal-entry { opacity: .4; }
+.writing-archive:focus-within .journal-entry:focus-visible { opacity: 1; }
 
 .contributions { --calendar-gap: clamp(1.5px, .27vw, 3px); }
 .calendar-days, .calendar-months { display: grid; grid-template-columns: repeat(var(--calendar-weeks), minmax(0, 1fr)); column-gap: var(--calendar-gap); }
@@ -393,15 +402,17 @@ h1 {
   .site-shell main { padding-block: 36px 40px; }
   .journal { gap: 38px; }
   .journal-intro p { font-size: 16px; }
-  .writing-index section { grid-template-columns: 52px 1fr; gap: 12px; }
+  .writing-archive section { grid-template-columns: 64px minmax(0, 1fr); }
   .calendar-months span:nth-child(even) { visibility: hidden; }
 }
 @media (prefers-reduced-motion: no-preference) {
   @keyframes journal-arrive { from { opacity: .65; transform: translateY(4px); } }
+  @keyframes writing-arrive { from { opacity: 0; transform: translateY(10px); } }
   .journal > * { animation: journal-arrive 240ms ease-out backwards; }
   .journal > section { animation-delay: 40ms; }
-  .section-index [aria-hidden] { display: inline-block; transition: transform 160ms ease; }
-  .section-index:hover [aria-hidden] { transform: translateX(2px); }
+  .journal > .recent-writing { animation: writing-arrive 600ms ease 360ms both; }
+  .writing-list--recent .journal-entry { transition: text-decoration-color 200ms ease; }
+  .writing-list--archive .journal-entry { transition: opacity 200ms ease; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

@@ -19,12 +19,14 @@ function Writing() {
   return (
     <div className="journal writing-index">
       <h1 lang="en">Writing</h1>
-      {Array.from(years, ([year, entries]) => (
-        <section key={year} aria-label={`${year} 年的文章`}>
-          <h2>{year}</h2>
-          <PostList entries={entries} archive />
-        </section>
-      ))}
+      <div className="writing-archive">
+        {Array.from(years, ([year, entries]) => (
+          <section key={year} aria-label={`${year} 年的文章`}>
+            <h2>{year}</h2>
+            <PostList entries={entries} archive />
+          </section>
+        ))}
+      </div>
     </div>
   )
 }
