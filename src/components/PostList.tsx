@@ -18,7 +18,7 @@ export function PostList({ entries = posts.slice(0, 3), archive = false }: PostL
       {!archive && (
         <li>
           <Link className="journal-entry" to="/posts" lang="en">All writing</Link>
-          <p className="entry-description">记录代码、Homelab 和创作工具中的实践。</p>
+          <p className="entry-description">按年份浏览全部文章。</p>
         </li>
       )}
     </ul>

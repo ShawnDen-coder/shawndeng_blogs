@@ -347,6 +347,7 @@ h1 {
 .journal-intro p + p { margin-top: 10px; }
 .inline-link { margin-left: .4em; color: var(--ui-info); text-decoration: underline; text-underline-offset: .22em; }
 .journal h2 { font-size: 27px; line-height: 1.25; }
+.journal .recent-writing h2 { font-size: 14px; color: var(--ui-text-secondary); }
 .journal-entry time { font-size: 13px; color: var(--ui-text-muted); }
 .writing-list { list-style: none; padding: 0; margin: 0; }
 .journal section > h2 { margin-bottom: 13px; }
