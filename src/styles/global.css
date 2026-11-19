@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 @import './ocean.css';
+@font-face {
+  font-family: 'Allura';
+  src: url('../assets/fonts/allura/Allura-Latin-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 /* CJK-only faces keep Latin letters and numbers in JetBrains Mono. */
 @font-face {
   font-family: 'Site Sarasa';
@@ -339,7 +346,14 @@ h1 {
   font-size: clamp(40px, 4.5vw, 58px); line-height: 1.15;
 }
 .site-header--home + main { padding-top: var(--home-inset); }
-.journal-intro h1 { padding-inline-end: 48px; }
+.journal-intro h1 {
+  padding-inline-end: 48px;
+  font-family: 'Allura', cursive;
+  font-size: clamp(56px, 6vw, 76px);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
 .profile-socials { display: flex; margin: 6px 0 16px -13px; }
 .profile-socials a { display: grid; place-items: center; width: 44px; height: 44px; color: var(--ui-text-secondary); }
 .profile-socials a:is(:hover, :focus-visible) { color: var(--ui-text-primary); }
@@ -400,6 +414,7 @@ h1 {
   .site-header:not(.site-header--home) { padding-block: 14px; }
   .site-shell main { padding-block: 36px 40px; }
   .journal { gap: 38px; }
+  .journal-intro h1 { font-size: clamp(46px, 14.35vw, 56px); }
   .journal-intro p { font-size: 16px; }
   .writing-archive section { grid-template-columns: 64px minmax(0, 1fr); }
   .calendar-months span:nth-child(even) { visibility: hidden; }
