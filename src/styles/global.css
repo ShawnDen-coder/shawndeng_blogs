@@ -334,14 +334,15 @@ h1 {
   font-size: clamp(40px, 4.5vw, 58px); line-height: 1.15;
 }
 .site-header--home + main { padding-top: var(--home-inset); }
-.journal-intro h1 { margin-bottom: 24px; padding-inline-end: 48px; }
+.journal-intro h1 { padding-inline-end: 48px; }
+.profile-socials { display: flex; margin: 6px 0 16px -13px; }
+.profile-socials a { display: grid; place-items: center; width: 44px; height: 44px; color: var(--ui-text-secondary); }
+.profile-socials a:is(:hover, :focus-visible) { color: var(--ui-text-primary); }
 .journal-intro p { max-width: 36em; font-size: 17px; line-height: 1.85; text-wrap: pretty; }
 .journal-intro p + p { margin-top: 10px; }
 .inline-link { margin-left: .4em; color: var(--ui-info); text-decoration: underline; text-underline-offset: .22em; }
 .journal h2 { font-size: 27px; line-height: 1.25; }
-.calendar-profile { display: block; width: fit-content; margin-inline-start: auto; margin-bottom: 13px; }
-.calendar-profile, .journal-entry time { font-size: 13px; color: var(--ui-text-muted); }
-.calendar-profile:hover { color: var(--ui-info); }
+.journal-entry time { font-size: 13px; color: var(--ui-text-muted); }
 .writing-list { list-style: none; padding: 0; margin: 0; }
 .writing-list li + li { margin-top: 8px; }
 .journal section > h2 { margin-bottom: 13px; }
