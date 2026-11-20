@@ -1,21 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { applyTheme, isThemePreference, themeStorageKey, type ThemePreference } from '../lib/theme'
+import { makeTileMask } from '../lib/theme-reveal'
 
-// A single stepped outline grows from the control. Unlike a mask made of
-// hundreds of individual tiles, its geometry stays fixed throughout the reveal.
-function revealTiles(x: number, y: number) {
-  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.5
-  const outline = [
-    [-.3,-1], [.3,-1], [.3,-.85], [.6,-.85], [.6,-.6], [.85,-.6], [.85,-.3], [1,-.3],
-    [1,.3], [.85,.3], [.85,.6], [.6,.6], [.6,.85], [.3,.85], [.3,1], [-.3,1],
-    [-.3,.85], [-.6,.85], [-.6,.6], [-.85,.6], [-.85,.3], [-1,.3], [-1,-.3], [-.85,-.3],
-    [-.85,-.6], [-.6,-.6], [-.6,-.85], [-.3,-.85]
-  ]
-  const polygon = (scale: number) => `polygon(${outline.map(([dx, dy]) => `${x + dx * scale}px ${y + dy * scale}px`).join(',')})`
-  return document.documentElement.animate(
-    [{ clipPath: polygon(0) }, { clipPath: polygon(radius) }],
-    { duration: 560, easing: 'linear', fill: 'both', pseudoElement: '::view-transition-new(root)' }
-  )
+// The mask is generated once, rather than rebuilding a growing path each frame.
+// Its discrete SVG animations reveal the new snapshot in 48px squares.
+function tileMask(x: number, y: number, width: number, height: number) {
+  const svg = makeTileMask(x, y, width, height)
+  const style = document.createElement('style')
+  style.dataset.themeReveal = ''
+  style.textContent = `::view-transition-new(root){mask-image:url("data:image/svg+xml,${encodeURIComponent(svg)}");mask-size:${width}px ${height}px;mask-repeat:no-repeat}`
+  document.head.appendChild(style)
+  return style
 }
 
 export function useThemeControl() {
@@ -23,12 +18,39 @@ export function useThemeControl() {
   const sequence = useRef(0)
   const active = useRef<ViewTransition | null>(null)
   const animation = useRef<Animation | null>(null)
+  const mask = useRef<HTMLStyleElement | null>(null)
+  const requested = useRef<ThemePreference>('system')
+  const suppression = useRef<HTMLStyleElement | null>(null)
+  const suppressionFrame = useRef<number | null>(null)
+
+  const clearSuppression = () => {
+    if (suppressionFrame.current !== null) cancelAnimationFrame(suppressionFrame.current)
+    suppressionFrame.current = null
+    suppression.current?.remove()
+    suppression.current = null
+  }
+
+  const applyWithoutTransition = (next: ThemePreference) => {
+    clearSuppression()
+    const style = document.createElement('style')
+    style.dataset.themeTransitionSuppression = ''
+    style.textContent = '*, *::before, *::after { transition: none !important; }'
+    document.head.appendChild(style)
+    suppression.current = style
+    applyTheme(next)
+    // Resolve the new colors while transitions are disabled, before the new
+    // view-transition snapshot is captured or normal transitions resume.
+    void getComputedStyle(document.body).color
+    suppressionFrame.current = requestAnimationFrame(clearSuppression)
+  }
 
   const cancel = () => {
     animation.current?.cancel()
     animation.current = null
     active.current?.skipTransition()
     active.current = null
+    mask.current?.remove()
+    mask.current = null
   }
 
   useEffect(() => {
@@ -39,9 +61,10 @@ export function useThemeControl() {
     } catch { /* Storage is optional. */ }
     const sync = (next: ThemePreference) => {
       ++sequence.current
+      requested.current = next
       cancel()
       setPreference(next)
-      applyTheme(next)
+      applyWithoutTransition(next)
     }
     sync(current)
     const onStorage = (event: StorageEvent) => {
@@ -49,10 +72,19 @@ export function useThemeControl() {
         sync(isThemePreference(event.newValue) ? event.newValue : 'system')
     }
     window.addEventListener('storage', onStorage)
-    return () => {
-      window.removeEventListener('storage', onStorage)
+    const onResize = () => {
+      if (!active.current) return
       ++sequence.current
       cancel()
+      applyWithoutTransition(requested.current)
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('resize', onResize)
+      ++sequence.current
+      cancel()
+      clearSuppression()
     }
   }, [])
 
@@ -62,7 +94,7 @@ export function useThemeControl() {
     const onChange = () => {
       ++sequence.current
       cancel()
-      applyTheme('system')
+      applyWithoutTransition('system')
     }
     media.addEventListener('change', onChange)
     return () => media.removeEventListener('change', onChange)
@@ -71,25 +103,31 @@ export function useThemeControl() {
   const targetColor = useRef('light')
   const change = (next: ThemePreference, button: HTMLElement) => {
     const id = ++sequence.current
+    requested.current = next
     setPreference(next)
     try { localStorage.setItem(themeStorageKey, next) } catch { /* Optional persistence. */ }
     const target = next === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : next
     targetColor.current = target
     if (active.current || target === document.documentElement.dataset.theme ||
       matchMedia('(prefers-reduced-motion: reduce)').matches || !document.startViewTransition ||
-      !CSS.supports('clip-path', 'polygon(0 0, 1px 0, 1px 1px)')) {
+      !CSS.supports('mask-image', 'url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22/%3E")') ||
+      Math.ceil(innerWidth / 48) * Math.ceil(innerHeight / 48) > 3000) {
       cancel()
-      applyTheme(next)
+      applyWithoutTransition(next)
       return
     }
     const bounds = button.getBoundingClientRect()
-    const apply = () => { if (sequence.current === id) applyTheme(next) }
+    const apply = () => { if (sequence.current === id) applyWithoutTransition(next) }
     try {
+      mask.current = tileMask(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, innerWidth, innerHeight)
       const transition = document.startViewTransition(apply)
       active.current = transition
       transition.ready.then(() => {
         if (sequence.current === id) {
-          animation.current = revealTiles(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+          animation.current = document.documentElement.animate(
+            { opacity: [1, 1] },
+            { duration: 750, pseudoElement: '::view-transition-new(root)' }
+          )
           return animation.current.finished
         }
       }).catch(() => { transition.skipTransition(); apply() })
@@ -99,9 +137,11 @@ export function useThemeControl() {
           animation.current?.cancel()
           animation.current = null
           active.current = null
+          mask.current?.remove()
+          mask.current = null
         }
       })
-    } catch { apply() }
+    } catch { cancel(); apply() }
   }
 
   return {
