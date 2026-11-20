@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { DoubleSide, MathUtils, TextureLoader, Vector2, type Mesh, type Texture } from 'three'
 import type { TechCard } from './card-prints'
 
@@ -119,11 +119,18 @@ function CardMesh({ textures, pose, onReady, onTap }: Omit<Props, 'card'> & { te
     const sync = () => { reduced.current = preference.matches; invalidate() }
     sync()
     preference.addEventListener('change', sync)
-    onReady()
     return () => preference.removeEventListener('change', sync)
   }, [onReady, invalidate])
+  const announced = useRef(false)
+  const readyFrame = useRef<number | undefined>(undefined)
+  useLayoutEffect(() => () => { if (readyFrame.current !== undefined) cancelAnimationFrame(readyFrame.current) }, [])
   useFrame((_, dt) => {
     if (!mesh.current) return
+    if (!announced.current) {
+      announced.current = true
+      // The callback runs after this frame has been rendered to the canvas.
+      readyFrame.current = requestAnimationFrame(onReady)
+    }
     target.current.set(.5 + pose.x * .48, .5 + pose.y * .48)
     const light = uniforms.light.value
     // A demand-rendered canvas can have a long gap before the first frame of a new card.
@@ -148,7 +155,7 @@ function CardMesh({ textures, pose, onReady, onTap }: Omit<Props, 'card'> & { te
   )
 }
 
-export default function CardScene({ card, onReady, onTap }: Omit<Props, 'pose'>) {
+export default function CardScene({ card, visible, onReady, onTap }: Omit<Props, 'pose' | 'card'> & { card: TechCard | null; visible: boolean }) {
   const pose = useRef<Pose>({ x: -.28, y: .16 })
   const draw = useRef<(() => void) | undefined>(undefined)
   function move(x: number, y: number) {
@@ -157,14 +164,14 @@ export default function CardScene({ card, onReady, onTap }: Omit<Props, 'pose'>)
     draw.current?.()
   }
   return (
-    <div className="tech-interaction" onPointerMove={event => {
+    <div className="tech-interaction" style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? 'auto' : 'none' }} onPointerMove={event => {
       const rect = event.currentTarget.getBoundingClientRect()
       move(2 * (event.clientX - rect.left) / rect.width - 1, 1 - 2 * (event.clientY - rect.top) / rect.height)
     }} onPointerLeave={() => move(-.28, .16)} onPointerCancel={() => move(-.28, .16)}
       onPointerUp={event => { if (event.pointerType !== 'mouse') move(-.28, .16) }}>
       <Canvas camera={{ position: [0, 0, 5], fov: 34 }} dpr={[1, 2]} frameloop="demand"
         gl={{ alpha: true, antialias: true }} onCreated={state => { draw.current = state.invalidate }}>
-        <PrintedCard key={card.id} card={card} pose={pose.current} onReady={onReady} onTap={onTap} />
+        {card && <PrintedCard key={card.id} card={card} pose={pose.current} onReady={onReady} onTap={onTap} />}
       </Canvas>
     </div>
   )

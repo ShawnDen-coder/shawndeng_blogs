@@ -1,13 +1,21 @@
-import { lazy, Suspense, useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import avatar from '../../assets/shawn-cat.jpg'
-import { preparePrint, techCards } from './card-prints'
+import { gallery } from '../../generated/card-gallery'
 import { flyDeck } from './deck-flight'
+import CardGallery from './CardGallery'
 
-const CardGallery = lazy(() => import('./CardGallery'))
-const featured = techCards.flatMap((card, index) => card.placement
-  ? [{ placement: card.placement, image: preparePrint(index, true).face }]
-  : [])
+const featured = gallery.filter(card => card.placement)
+let warmedImages: HTMLImageElement[] | undefined
+function warmGallery() {
+  if ((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return
+  // Keep the images alive while the dialog opens; the browser reuses its cache.
+  warmedImages ??= gallery.slice(0, 3).map(card => {
+    const image = new Image()
+    image.src = card.thumbnail
+    return image
+  })
+}
 
 export function HomeCards() {
   const [expanded, setExpanded] = useState(false)
@@ -49,6 +57,7 @@ export function HomeCards() {
   return <>
     <button ref={trigger} className="home-deck" type="button" aria-expanded={expanded} aria-controls="home-card-gallery"
       aria-haspopup="dialog" aria-label="展开技术卡册" title="展开技术卡册"
+      onPointerEnter={warmGallery} onFocus={warmGallery} onPointerDown={warmGallery}
       onClick={() => { dialog.current?.showModal(); dialog.current?.scrollTo(0, 0); setExpanded(true) }}>
       <span className="deck-art">
         <span className="deck-outline" aria-hidden="true">
@@ -57,7 +66,7 @@ export function HomeCards() {
           <span className="deck-expand" />
         </span>
         {featured.map(card => <img key={card.placement} className={`deck-print deck-print--${card.placement}`}
-          src={card.image} alt="" width="600" height="840" />)}
+          src={card.thumbnail} alt="" width="600" height="840" />)}
         <img ref={portrait} className="deck-portrait" src={avatar} width="480" height="480" alt="" />
         <span className="deck-expand" aria-hidden="true">+</span>
       </span>
@@ -79,9 +88,7 @@ export function HomeCards() {
           <h2 id="deck-title" lang="en">Tech cards</h2>
           <button type="button" className="deck-dismiss" aria-label="收起技术卡册" onClick={closeDeck}>×</button>
         </header>
-        {expanded && <Suspense fallback={<p role="status">正在展开卡册…</p>}>
-          <CardGallery gridRef={mountGrid} />
-        </Suspense>}
+        {expanded && <CardGallery gridRef={mountGrid} />}
       </div>
     </dialog>
   </>
