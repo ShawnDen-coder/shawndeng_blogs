@@ -1,32 +1,35 @@
 import { useEffect, useRef, useState } from 'react'
 import { applyTheme, isThemePreference, themeStorageKey, type ThemePreference } from '../lib/theme'
 
-// Each frame reveals whole tiles of the incoming snapshot. Cap the tile count
-// on large screens so the mask stays small even on ultrawide displays.
+// A single stepped outline grows from the control. Unlike a mask made of
+// hundreds of individual tiles, its geometry stays fixed throughout the reveal.
 function revealTiles(x: number, y: number) {
-  const size = Math.max(38, Math.ceil(Math.sqrt(innerWidth * innerHeight / 500)))
-  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
-  const buckets = Array.from({ length: 20 }, () => [] as string[])
-  for (let top = 0; top < innerHeight; top += size) {
-    for (let left = 0; left < innerWidth; left += size) {
-      const distance = Math.hypot(left + size / 2 - x, top + size / 2 - y) / radius
-      const frame = Math.min(buckets.length - 1, Math.floor((distance * 0.82 + Math.random() * 0.18) * buckets.length))
-      buckets[frame].push(`M${left} ${top}h${size}v${size}h-${size}z`)
-    }
-  }
-  let path = 'M0 0'
-  const frames = [{ clipPath: `path('${path}')`, easing: 'steps(1, end)' }]
-  for (const bucket of buckets) {
-    path += bucket.join('')
-    frames.push({ clipPath: `path('${path}')`, easing: 'steps(1, end)' })
-  }
-  return document.documentElement.animate(frames, { duration: 560, fill: 'both', pseudoElement: '::view-transition-new(root)' })
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) * 1.5
+  const outline = [
+    [-.3,-1], [.3,-1], [.3,-.85], [.6,-.85], [.6,-.6], [.85,-.6], [.85,-.3], [1,-.3],
+    [1,.3], [.85,.3], [.85,.6], [.6,.6], [.6,.85], [.3,.85], [.3,1], [-.3,1],
+    [-.3,.85], [-.6,.85], [-.6,.6], [-.85,.6], [-.85,.3], [-1,.3], [-1,-.3], [-.85,-.3],
+    [-.85,-.6], [-.6,-.6], [-.6,-.85], [-.3,-.85]
+  ]
+  const polygon = (scale: number) => `polygon(${outline.map(([dx, dy]) => `${x + dx * scale}px ${y + dy * scale}px`).join(',')})`
+  return document.documentElement.animate(
+    [{ clipPath: polygon(0) }, { clipPath: polygon(radius) }],
+    { duration: 560, easing: 'linear', fill: 'both', pseudoElement: '::view-transition-new(root)' }
+  )
 }
 
 export function useThemeControl() {
   const [preference, setPreference] = useState<ThemePreference>('system')
   const sequence = useRef(0)
   const active = useRef<ViewTransition | null>(null)
+  const animation = useRef<Animation | null>(null)
+
+  const cancel = () => {
+    animation.current?.cancel()
+    animation.current = null
+    active.current?.skipTransition()
+    active.current = null
+  }
 
   useEffect(() => {
     let current: ThemePreference = 'system'
@@ -36,8 +39,7 @@ export function useThemeControl() {
     } catch { /* Storage is optional. */ }
     const sync = (next: ThemePreference) => {
       ++sequence.current
-      active.current?.skipTransition()
-      active.current = null
+      cancel()
       setPreference(next)
       applyTheme(next)
     }
@@ -49,7 +51,8 @@ export function useThemeControl() {
     window.addEventListener('storage', onStorage)
     return () => {
       window.removeEventListener('storage', onStorage)
-      active.current?.skipTransition()
+      ++sequence.current
+      cancel()
     }
   }, [])
 
@@ -58,8 +61,7 @@ export function useThemeControl() {
     const media = matchMedia('(prefers-color-scheme: dark)')
     const onChange = () => {
       ++sequence.current
-      active.current?.skipTransition()
-      active.current = null
+      cancel()
       applyTheme('system')
     }
     media.addEventListener('change', onChange)
@@ -75,9 +77,8 @@ export function useThemeControl() {
     targetColor.current = target
     if (active.current || target === document.documentElement.dataset.theme ||
       matchMedia('(prefers-reduced-motion: reduce)').matches || !document.startViewTransition ||
-      !CSS.supports('clip-path', 'path("M0 0h1v1z")')) {
-      active.current?.skipTransition()
-      active.current = null
+      !CSS.supports('clip-path', 'polygon(0 0, 1px 0, 1px 1px)')) {
+      cancel()
       applyTheme(next)
       return
     }
@@ -87,9 +88,19 @@ export function useThemeControl() {
       const transition = document.startViewTransition(apply)
       active.current = transition
       transition.ready.then(() => {
-        if (sequence.current === id) return revealTiles(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2).finished
+        if (sequence.current === id) {
+          animation.current = revealTiles(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+          return animation.current.finished
+        }
       }).catch(() => { transition.skipTransition(); apply() })
-      transition.finished.catch(apply).finally(() => { if (sequence.current === id) active.current = null })
+      transition.finished.catch(apply).finally(() => {
+        if (sequence.current === id) {
+          // A filled WAAPI animation remains registered after it finishes.
+          animation.current?.cancel()
+          animation.current = null
+          active.current = null
+        }
+      })
     } catch { apply() }
   }
 
