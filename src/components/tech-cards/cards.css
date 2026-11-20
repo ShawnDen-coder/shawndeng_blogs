@@ -1,0 +1,86 @@
+.tech-filters { display: flex; flex-wrap: wrap; gap: 0 clamp(12px, 2vw, 26px); margin: 12px 0 18px; }
+.tech-filters button { min-height: 44px; color: var(--ui-text-secondary); cursor: pointer; font-size: 15px; }
+.tech-filters button[aria-pressed=true] { color: var(--ui-text-primary); text-decoration: underline 2px var(--ui-accent); text-underline-offset: 7px; }
+.tech-filters span { font-variant-numeric: tabular-nums; }
+.tech-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr)); gap: clamp(10px, 1.5vw, 20px); }
+.tech-tile { display: block; position: relative; width: 100%; aspect-ratio: 5 / 7; border-radius: 5.6% / 4%; cursor: zoom-in; transition: transform .2s ease; }
+.tech-tile img { width: 100%; height: 100%; display: block; }
+.tech-tile::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: .22; mix-blend-mode: screen;
+  background: linear-gradient(115deg, transparent 8%, #b577ad 29%, #8698db 37%, #76bead 44%, transparent 56%); background-size: 155% 100%; transition: background-position .32s, opacity .32s; }
+@media (hover: hover) {
+  .tech-tile:hover { transform: perspective(800px) translateY(-3px) rotateY(-6deg) rotateX(3deg); }
+  .tech-tile:hover::after { opacity: .51; background-position: 90% 0; }
+}
+html:has(.tech-viewer[open]) { overflow: hidden; }
+.tech-viewer { position: fixed; inset: 0; margin: auto; padding: 0; border: 0; overflow: visible; width: min(94vw, 540px); max-height: none; background: transparent; color: #f4f4f0; }
+.tech-viewer::backdrop { background: rgb(6 10 16 / 91%); }
+.tech-inspect { position: relative; display: grid; justify-items: center; gap: 6px; }
+.tech-close, .tech-pages button { min-height: 44px; min-width: 44px; color: inherit; cursor: pointer; line-height: 1; }
+.tech-close { justify-self: end; font-size: 30px; }
+.tech-frame { position: relative; width: min(100%, 480px, max(120px, calc((100dvh - 155px) * .8))); aspect-ratio: 4 / 5; }
+.tech-interaction, .tech-print { position: absolute; inset: 0; }
+.tech-interaction { touch-action: none; }
+.tech-print { height: 91.6%; width: auto; margin: auto; }
+.tech-pages { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: center; }
+.tech-pages h2 { font: 500 clamp(22px, 3vw, 32px)/1.2 var(--font-display); color: inherit; }
+.tech-pages p { margin: 4px 0 0; color: #c5cccf; font-size: 14px; }
+.tech-pages button { font-size: 25px; }
+.tech-viewer button:hover { color: #d8c89c; }
+@media (prefers-reduced-motion: reduce) {
+  .tech-tile, .tech-tile::after { transition: none; }
+  .tech-tile:hover { transform: none; }
+}
+
+.profile-calendar { --deck-width: clamp(132px, 18vw, 184px); position: relative; display: flow-root; }
+.profile-calendar .calendar-months { position: relative; top: -14px; }
+/* The fan covers the start of each row. Its outline trims the exposed squares. */
+.profile-calendar .calendar-days { clip-path: inset(-3px -3px -3px calc(var(--deck-width) / 2)); }
+.profile-calendar .calendar-days:has(:focus-visible) { clip-path: none; }
+.home-deck { position: absolute; z-index: 2; top: 9px;
+  left: 0;
+  border-radius: 50%; cursor: pointer; pointer-events: none; }
+.deck-art > :not(.deck-outline) { pointer-events: auto; }
+.deck-art { display: block; position: relative; isolation: isolate; width: var(--deck-width); aspect-ratio: 1.52; }
+.deck-print { position: absolute; bottom: 16%; left: 33%; width: 34%; aspect-ratio: 5 / 7; height: auto; border-radius: 5.6% / 4%;
+  box-shadow: 0 2px 6px #121c2426; transform-origin: center 90%;
+  transform: translateX(var(--spread)) rotate(var(--tilt)); transition: filter .2s, opacity .2s; }
+.deck-print--aside { --spread: -42%; --tilt: -38deg; }
+.deck-print--lead { --spread: -16%; --tilt: -14deg; }
+.deck-print--behind { --spread: 16%; --tilt: 14deg; }
+.deck-print--outer { --spread: 42%; --tilt: 38deg; }
+.deck-portrait { position: absolute; z-index: 1; width: 42%; aspect-ratio: 1; height: auto; bottom: 0; left: 29%; object-fit: cover;
+  border: 2px solid var(--ui-bg-page); border-radius: 50%; box-shadow: 0 2px 6px #14212d35; }
+.deck-expand { position: absolute; z-index: 2; left: 61%; bottom: 0; display: grid; place-items: center;
+  width: 19px; height: 19px; border-radius: 50%; background: var(--ui-text-primary); color: var(--ui-bg-page); font: 16px/1 system-ui; }
+/* Paint one continuous paper edge behind the whole fan, including the circular portrait. */
+.deck-outline { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.deck-outline > * { border: 0; box-shadow: none; }
+.deck-outline > *::before { content: ''; position: absolute; inset: -4px; border-radius: inherit;
+  background: var(--ui-bg-page); pointer-events: auto; }
+.profile-calendar:has(.calendar-days :focus-visible) .deck-art { visibility: hidden; }
+@media (hover: hover) and (pointer: fine) {
+  .home-deck[aria-expanded=false]:hover img.deck-print { filter: brightness(1.15); }
+}
+.home-deck[aria-expanded=true] .deck-print { opacity: 0; }
+
+html:has(.deck-overlay[open]) { overflow: hidden; }
+.deck-overlay { position: fixed; inset: 0; margin: 0; border: 0; width: 100%; height: 100%; max-width: none; max-height: none;
+  padding: clamp(20px, 6vh, 64px) clamp(16px, 5vw, 80px); overflow: auto; overscroll-behavior: contain;
+  background: transparent; color: var(--ui-text-primary); }
+.deck-overlay::backdrop { background: color-mix(in srgb, var(--ui-bg-page) 86%, transparent); backdrop-filter: blur(7px); }
+.deck-overlay[data-closing]::backdrop { opacity: 0; transition: opacity .48s ease; }
+.deck-sheet { max-width: 1140px; margin: 0 auto; }
+.deck-heading { display: flex; align-items: center; justify-content: space-between; }
+.deck-heading h2 { font: 500 clamp(28px, 4vw, 45px)/1.1 var(--font-display); letter-spacing: -.035em; }
+.deck-dismiss { position: fixed; top: max(12px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right));
+  z-index: 2; width: 44px; height: 44px; border-radius: 50%; background: var(--ui-bg-elevated); color: var(--ui-text-primary);
+  box-shadow: 0 1px 5px #0002; cursor: pointer; font: 26px/1 system-ui; }
+.deck-overlay[data-closing] :is(.deck-heading, .tech-filters) { opacity: 0; transition: opacity .16s ease; }
+@media (max-width: 560px) {
+  .home-deck { top: 12px; }
+  .tech-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tech-filters button { font-size: 13px; min-height: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck-print, .deck-overlay[data-closing]::backdrop { transition: none; }
+}

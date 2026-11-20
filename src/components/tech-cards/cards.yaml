@@ -1,0 +1,230 @@
+# 卡片按列表顺序展示；复制一项并修改字段即可添加卡片。
+# 文案含 YAML 特殊字符时请加引号；颜色必须写成引号包裹的 #RRGGBB。
+# emblem: wheel、sail，mark:<marks 目录中的文件名>，或 symbol:<下列名称>。
+# symbol: kustomize、sops、external、agents、r3f、gitops、devops、pipeline、iac
+# placement（可选，每个槽位最多一张）: 扇面从左至右为 aside、lead、behind、outer。
+# ground: cluster、tide、traces、stack、lattice、cipher、flow、orbit、facets、coils
+- id: kubernetes
+  name: Kubernetes
+  group: Clusters & Delivery
+  role: 编排容器与集群工作负载
+  inscription: Container orchestration
+  paper: "#0a263f"
+  ocean: "#216477"
+  foil: "#e2d2a7"
+  emblem: wheel
+  ground: cluster
+  placement: lead
+- id: fluxcd
+  name: FluxCD
+  group: Clusters & Delivery
+  role: 从 Git 同步集群配置
+  inscription: GitOps delivery
+  paper: "#102f32"
+  ocean: "#397664"
+  foil: "#efcc90"
+  emblem: sail
+  ground: tide
+  placement: behind
+- id: helm
+  name: Helm
+  group: Clusters & Delivery
+  role: 用 Chart 打包和发布应用
+  inscription: Kubernetes packages
+  paper: "#141d40"
+  ocean: "#445d93"
+  foil: "#e5d7ad"
+  emblem: mark:helm
+  ground: stack
+- id: kustomize
+  name: Kustomize
+  group: Clusters & Delivery
+  role: 按环境叠加资源配置
+  inscription: Declarative overlays
+  paper: "#143947"
+  ocean: "#367c87"
+  foil: "#f3d7a4"
+  emblem: symbol:kustomize
+  ground: facets
+- id: github-actions
+  name: GitHub Actions
+  group: Clusters & Delivery
+  role: 在仓库中运行构建与测试
+  inscription: Repository workflows
+  paper: "#162c47"
+  ocean: "#3277a5"
+  foil: "#c7e9ef"
+  emblem: mark:githubactions
+  ground: traces
+- id: docker
+  name: Docker
+  group: Systems & Data
+  role: 用镜像封装运行环境
+  inscription: Container images
+  paper: "#062d4b"
+  ocean: "#237ca0"
+  foil: "#d3eced"
+  emblem: mark:docker
+  ground: stack
+- id: linux
+  name: Linux
+  group: Systems & Data
+  role: 运行自托管服务的操作系统
+  inscription: Operating system
+  paper: "#30271e"
+  ocean: "#7b6540"
+  foil: "#f6da90"
+  emblem: mark:linux
+  ground: lattice
+- id: postgresql
+  name: PostgreSQL
+  group: Systems & Data
+  role: 用关系模型存储和查询数据
+  inscription: Relational database
+  paper: "#152f49"
+  ocean: "#416f99"
+  foil: "#d3e7dd"
+  emblem: mark:postgresql
+  ground: stack
+- id: airflow
+  name: Apache Airflow
+  group: Systems & Data
+  role: 用 DAG 编排定时任务
+  inscription: Workflow orchestration
+  paper: "#06373a"
+  ocean: "#44888c"
+  foil: "#f0cfad"
+  emblem: mark:apacheairflow
+  ground: flow
+- id: sops
+  name: SOPS
+  group: Secrets
+  role: 加密 Git 仓库中的配置值
+  inscription: Encrypted configuration
+  paper: "#342438"
+  ocean: "#795179"
+  foil: "#efc3c7"
+  emblem: symbol:sops
+  ground: cipher
+- id: external-secrets
+  name: External Secrets
+  group: Secrets
+  role: 将外部密钥同步到集群
+  inscription: Secret synchronization
+  paper: "#142d36"
+  ocean: "#4e7881"
+  foil: "#edd59a"
+  emblem: symbol:external
+  ground: traces
+- id: python
+  name: Python
+  group: Development
+  role: 编写自动化脚本和平台工具
+  inscription: Platform automation
+  paper: "#162f45"
+  ocean: "#507b8e"
+  foil: "#f9d56b"
+  emblem: mark:python
+  ground: coils
+  placement: aside
+- id: rust
+  name: Rust
+  group: Development
+  role: 构建命令行工具与系统组件
+  inscription: Systems programming
+  paper: "#3f251f"
+  ocean: "#996044"
+  foil: "#f0ca9f"
+  emblem: mark:rust
+  ground: lattice
+  placement: outer
+- id: vue
+  name: Vue.js
+  group: Development
+  role: 用响应式组件构建界面
+  inscription: Reactive interfaces
+  paper: "#102f2a"
+  ocean: "#3a8068"
+  foil: "#bce3bf"
+  emblem: mark:vuedotjs
+  ground: facets
+- id: react
+  name: React
+  group: Development
+  role: 用组件组织交互界面
+  inscription: Component interfaces
+  paper: "#112d42"
+  ocean: "#337991"
+  foil: "#a5e5f2"
+  emblem: mark:react
+  ground: orbit
+- id: typescript
+  name: TypeScript
+  group: Development
+  role: 为前后端代码定义类型
+  inscription: Typed application code
+  paper: "#0f2e55"
+  ocean: "#376fa2"
+  foil: "#cedfec"
+  emblem: mark:typescript
+  ground: lattice
+- id: r3f
+  name: React Three Fiber
+  group: Development
+  role: 用 React 驱动这套三维卡面
+  inscription: Declarative 3D rendering
+  paper: "#262441"
+  ocean: "#645387"
+  foil: "#ddc8f4"
+  emblem: symbol:r3f
+  ground: facets
+- id: ai-agents
+  name: AI Agents
+  group: Development
+  role: 组合模型与工具完成自动化任务
+  inscription: Agent tooling
+  paper: "#25243e"
+  ocean: "#60598a"
+  foil: "#e6c8df"
+  emblem: symbol:agents
+  ground: traces
+- id: gitops
+  name: GitOps
+  group: Engineering Practices
+  role: 将 Git 中的期望状态同步到环境
+  inscription: Versioned desired state
+  paper: "#25223a"
+  ocean: "#665a83"
+  foil: "#e7d5a5"
+  emblem: symbol:gitops
+  ground: flow
+- id: devops
+  name: DevOps
+  group: Engineering Practices
+  role: 将开发、交付与运维连成循环
+  inscription: Development and operations
+  paper: "#12302f"
+  ocean: "#34746e"
+  foil: "#e7d5b2"
+  emblem: symbol:devops
+  ground: coils
+- id: ci-cd
+  name: CI/CD
+  group: Engineering Practices
+  role: 自动构建、验证与交付变更
+  inscription: Continuous delivery
+  paper: "#162a40"
+  ocean: "#4a668f"
+  foil: "#d6d7ed"
+  emblem: symbol:pipeline
+  ground: traces
+- id: iac
+  name: Infrastructure as Code
+  group: Engineering Practices
+  role: 用版本化声明重建基础设施
+  inscription: Reproducible infrastructure
+  paper: "#332b26"
+  ocean: "#786350"
+  foil: "#efdfb3"
+  emblem: symbol:iac
+  ground: stack

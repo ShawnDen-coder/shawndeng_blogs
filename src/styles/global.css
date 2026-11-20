@@ -344,7 +344,7 @@ h1 {
   font-size: clamp(40px, 4.5vw, 58px); line-height: 1.15;
 }
 .site-shell .site-header--home + main { padding-top: var(--home-inset); }
-.profile-identity { display: flex; align-items: flex-end; justify-content: space-between; }
+.profile-identity { display: flex; align-items: flex-end; justify-content: space-between; gap: 4px; }
 .journal-intro h1 {
   flex: none;
   font-family: 'Allura Signature', 'Allura', cursive;
@@ -354,7 +354,7 @@ h1 {
   line-height: 1.1;
   white-space: nowrap;
 }
-.profile-socials { display: flex; flex: none; margin: 0 0 -2px; }
+.profile-socials { display: flex; flex: none; margin: 0 -12px -2px 0; }
 .profile-socials a { display: grid; place-items: center; width: 44px; height: 44px; color: var(--ui-text-secondary); }
 .profile-socials a:is(:hover, :focus-visible) { color: var(--ui-text-primary); }
 .journal-intro p { max-width: 36em; font-size: 17px; line-height: 1.85; text-wrap: pretty; }
@@ -374,8 +374,7 @@ h1 {
   overflow-wrap: break-word;
 }
 .journal-intro .home-introduction p + p { margin-top: 24px; }
-.journal-intro .home-introduction p:first-child { color: var(--ui-text-primary); }
-.journal-intro .home-introduction p:last-child { color: var(--ui-text-primary); font-weight: 500; text-align: start; }
+.journal-intro .home-introduction p:last-child { font-weight: 500; text-align: start; }
 .journal h2 { font-size: 27px; line-height: 1.25; }
 .journal .recent-writing h2 { font-size: 14px; color: var(--ui-text-secondary); }
 .journal-entry time { font-size: 13px; color: var(--ui-text-muted); }
