@@ -169,7 +169,8 @@ export default function CardScene({ card, visible, onReady, onTap }: Omit<Props,
       move(2 * (event.clientX - rect.left) / rect.width - 1, 1 - 2 * (event.clientY - rect.top) / rect.height)
     }} onPointerLeave={() => move(-.28, .16)} onPointerCancel={() => move(-.28, .16)}
       onPointerUp={event => { if (event.pointerType !== 'mouse') move(-.28, .16) }}>
-      <Canvas camera={{ position: [0, 0, 5], fov: 34 }} dpr={[1, 2]} frameloop="demand"
+      {/* Measure the layout box even while the opening animation scales the frame. */}
+      <Canvas resize={{ offsetSize: true }} camera={{ position: [0, 0, 5], fov: 34 }} dpr={[1, 2]} frameloop="demand"
         gl={{ alpha: true, antialias: true }} onCreated={state => { draw.current = state.invalidate }}>
         {card && <PrintedCard key={card.id} card={card} pose={pose.current} onReady={onReady} onTap={onTap} />}
       </Canvas>
