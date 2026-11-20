@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { MantaMotionLab } from '../components/ocean/MantaMotionLab'
 import { pageHead } from '../lib/seo'
+import jetbrainsRegular from '@fontsource/jetbrains-mono/latin-400.css?url'
 
 export const Route = createFileRoute('/lab/manta')({
   head: () => {
     const head = pageHead('蝠鲼动作曲线', '单只蝠鲼的拍翼、推进和转向调试预览。', '/lab/manta')
-    return { ...head, meta: [...head.meta, { name: 'robots', content: 'noindex, nofollow' }] }
+    return { ...head, meta: [...head.meta, { name: 'robots', content: 'noindex, nofollow' }],
+      links: [...head.links, { rel: 'stylesheet', href: jetbrainsRegular }] }
   },
   component: MantaMotionLab
 })

@@ -9,8 +9,6 @@ import { SiteLayout } from '../layouts/SiteLayout'
 import { NotFound } from '../components/NotFound'
 import { assetUrl } from '../lib/site'
 import { themeBootstrap } from '../lib/theme'
-import jetbrainsRegular from '@fontsource/jetbrains-mono/latin-400.css?url'
-import jetbrainsSemibold from '@fontsource/jetbrains-mono/latin-600.css?url'
 import styles from '../styles/global.css?url'
 
 export const Route = createRootRoute({
@@ -21,8 +19,6 @@ export const Route = createRootRoute({
       { property: 'og:site_name', content: 'Shawn Deng' }
     ],
     links: [
-      { rel: 'stylesheet', href: jetbrainsRegular },
-      { rel: 'stylesheet', href: jetbrainsSemibold },
       { rel: 'stylesheet', href: styles },
       {
         rel: 'alternate',
