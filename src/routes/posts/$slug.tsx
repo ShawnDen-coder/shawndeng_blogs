@@ -9,6 +9,8 @@ import remarkGfm from 'remark-gfm'
 import { loadPost } from '../../lib/posts'
 import { pageHead } from '../../lib/seo'
 import { assetUrl } from '../../lib/site'
+import jetbrainsRegular from '@fontsource/jetbrains-mono/latin-400.css?url'
+import jetbrainsSemibold from '@fontsource/jetbrains-mono/latin-600.css?url'
 
 export const Route = createFileRoute('/posts/$slug')({
   loader: async ({ params }) => {
@@ -22,8 +24,14 @@ export const Route = createFileRoute('/posts/$slug')({
       })
     return post
   },
-  head: ({ loaderData: post }) =>
-    post ? pageHead(post.title, post.description, `/posts/${post.slug}`) : {},
+  head: ({ loaderData: post }) => {
+    if (!post) return {}
+    const head = pageHead(post.title, post.description, `/posts/${post.slug}`)
+    return { ...head, links: [...head.links,
+      { rel: 'stylesheet', href: jetbrainsRegular },
+      { rel: 'stylesheet', href: jetbrainsSemibold }
+    ] }
+  },
   component: PostPage
 })
 
