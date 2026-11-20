@@ -354,7 +354,7 @@ h1 {
 .profile-identity { display: flex; align-items: flex-end; justify-content: space-between; }
 .journal-intro h1 {
   flex: none;
-  font-family: 'Allura', cursive;
+  font-family: 'Allura Signature', 'Allura', cursive;
   font-size: clamp(56px, 6vw, 76px);
   font-weight: 400;
   letter-spacing: 0;

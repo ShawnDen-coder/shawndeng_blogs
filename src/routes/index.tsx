@@ -3,9 +3,17 @@ import { ContributionCalendar } from '../components/ContributionCalendar'
 import { PersonalIntroduction, introductionSummary } from '../components/PersonalIntroduction'
 import { pageHead } from '../lib/seo'
 import { site } from '../lib/site'
+import signatureFont from '../assets/fonts/allura/Allura-Signature.woff2?inline'
 
 export const Route = createFileRoute('/')({
-  head: () => pageHead('首页', introductionSummary, '/'),
+  head: () => ({
+    ...pageHead('首页', introductionSummary, '/'),
+    // The fixed signature subset was generated from the licensed Allura face
+    // with fonttools --text='Shawn Deng'; the full face remains a fallback.
+    styles: [{ children: `@font-face{font-family:'Allura Signature';src:url('${signatureFont}') format('woff2');font-style:normal;font-weight:400;font-display:swap}` }],
+    // Start decoding while the document is still parsing, without hiding text.
+    scripts: [{ children: `if(document.fonts)document.fonts.load('1em "Allura Signature"','Shawn Deng').catch(()=>{})` }]
+  }),
   component: Home
 })
 
