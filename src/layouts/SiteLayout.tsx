@@ -1,7 +1,6 @@
 import { Link, useMatchRoute, useRouterState } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { ThemeIcon, useThemeControl } from '../components/ThemeSelect'
-import { assetUrl, site } from '../lib/site'
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const matchRoute = useMatchRoute()
@@ -18,14 +17,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           onClick={event => theme.toggle(event.currentTarget)}><ThemeIcon /></button>
       </header>
       <main id="main" tabIndex={-1}>{children}</main>
-      <footer className="site-footer">
-        <span>© {new Date().getFullYear()}{!isHome && ` ${site.name}`}</span>
-        <div className="footer-actions">
-          <button type="button" aria-pressed={theme.preference === 'system'}
-            onClick={event => theme.reset(event.currentTarget)}>跟随系统</button>
-          <a href={assetUrl('feed.xml')}>RSS</a>
-        </div>
-      </footer>
     </div>
   )
 }
