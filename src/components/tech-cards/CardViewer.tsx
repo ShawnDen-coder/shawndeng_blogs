@@ -1,7 +1,16 @@
-import { Component, lazy, Suspense, useCallback, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { preparePrint } from './card-prints'
+import { Component, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { gallery } from '../../generated/card-gallery'
+import type { TechCard } from './card-prints'
 
-const CardScene = lazy(() => import('./CardScene'))
+const loadScene = () => import('./CardScene')
+const loadPrints = () => import('./card-prints')
+const CardScene = lazy(loadScene)
+
+// Both imports start together; rejected speculative imports leave the static card usable.
+export function warmCardViewer() {
+  void loadScene().catch(() => {})
+  void loadPrints().catch(() => {})
+}
 
 class SceneBoundary extends Component<{ children: ReactNode; cardId: string }, { failed: boolean }> {
   state = { failed: false }
@@ -24,10 +33,35 @@ export function CardViewer({ selection, opener, onDismiss, onStep }: {
   const frame = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState<number | null>(null)
   const { index } = selection
-  const card = useMemo(() => preparePrint(index), [index])
-  const onReady = useCallback(() => setReady(index), [index])
+  const entry = gallery[index]
+  const [print, setPrint] = useState<{ index: number; card: TechCard } | null>(null)
+  const card = print?.index === index ? print.card : null
+  const activeIndex = useRef(index)
+  const onReady = useCallback(() => {
+    if (activeIndex.current === index) setReady(index)
+  }, [index])
 
-  useLayoutEffect(() => { setReady(null) }, [index])
+  useLayoutEffect(() => { activeIndex.current = index; setReady(null) }, [index])
+
+  useEffect(() => {
+    let active = true
+    let frame: number | undefined
+    let timer: ReturnType<typeof setTimeout> | undefined
+    void loadPrints().then(({ preparePrint }) => {
+      if (!active) return
+      // Let the cached thumbnail paint before generating the detailed plates.
+      frame = requestAnimationFrame(() => {
+        timer = setTimeout(() => {
+          if (active) setPrint({ index, card: preparePrint(index) })
+        }, 0)
+      })
+    }).catch(() => { /* Keep the cached thumbnail if loading fails. */ })
+    return () => {
+      active = false
+      if (frame !== undefined) cancelAnimationFrame(frame)
+      if (timer !== undefined) clearTimeout(timer)
+    }
+  }, [index])
 
   useLayoutEffect(() => {
     const viewer = dialog.current!
@@ -67,17 +101,20 @@ export function CardViewer({ selection, opener, onDismiss, onStep }: {
       }}>
       <div className="tech-inspect">
         <button className="tech-close" type="button" onClick={onDismiss} aria-label="关闭大图">×</button>
-        <div className="tech-frame" ref={frame} role="img" aria-label={card.name + ' 全息卡面'}>
-          {ready !== index && <img className="tech-print" src={card.face} alt="" />}
-          <SceneBoundary cardId={card.id}><Suspense fallback={null}>
-            <CardScene card={card} onReady={onReady} onTap={onDismiss} />
+        <div className="tech-frame" ref={frame} role="img" aria-label={entry.name + ' 全息卡面'}>
+          {ready !== index && <>
+            <img className="tech-print" src={entry.thumbnail} alt="" />
+            {card && <img className="tech-print" src={card.face} alt="" />}
+          </>}
+          <SceneBoundary cardId={entry.id}><Suspense fallback={null}>
+            <CardScene card={card} visible={card !== null && ready === index} onReady={onReady} onTap={onDismiss} />
           </Suspense></SceneBoundary>
         </div>
         <div className="tech-pages">
           <button type="button" aria-label="上一张卡" onClick={() => onStep(-1)}>←</button>
           <div aria-live="polite">
-            <h2 id="card-viewer-title">{card.name}</h2>
-            <p>{card.role}</p>
+            <h2 id="card-viewer-title">{entry.name}</h2>
+            <p>{entry.role}</p>
           </div>
           <button type="button" aria-label="下一张卡" onClick={() => onStep(1)}>→</button>
         </div>
