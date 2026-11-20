@@ -122,6 +122,13 @@ export function useThemeControl() {
       mask.current = tileMask(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2, innerWidth, innerHeight)
       const transition = document.startViewTransition(apply)
       active.current = transition
+      // During the root snapshot, browsers can retarget a second tap to <html>.
+      const onSnapshotClick = (event: MouseEvent) => {
+        if (active.current !== transition || event.target !== document.documentElement || !button.isConnected) return
+        const { left, right, top, bottom } = button.getBoundingClientRect()
+        if (event.clientX >= left && event.clientX < right && event.clientY >= top && event.clientY < bottom) button.click()
+      }
+      document.addEventListener('click', onSnapshotClick)
       transition.ready.then(() => {
         if (sequence.current === id) {
           animation.current = document.documentElement.animate(
@@ -132,6 +139,7 @@ export function useThemeControl() {
         }
       }).catch(() => { transition.skipTransition(); apply() })
       transition.finished.catch(apply).finally(() => {
+        document.removeEventListener('click', onSnapshotClick)
         if (sequence.current === id) {
           // A filled WAAPI animation remains registered after it finishes.
           animation.current?.cancel()

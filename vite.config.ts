@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 import fs from 'node:fs'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
+import { cardDataPlugin } from './scripts/card-data-plugin.mjs'
 
 const posts: Array<{ slug: string }> = JSON.parse(
   fs.readFileSync('src/generated/posts.json', 'utf8')
@@ -17,6 +18,7 @@ export default defineConfig({
   base,
   server: { host: '0.0.0.0', port: 5173 },
   plugins: [
+    cardDataPlugin(),
     {
       name: 'watch-article-content',
       configureServer(server) {

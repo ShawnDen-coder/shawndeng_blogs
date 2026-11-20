@@ -1,4 +1,4 @@
-import { memo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { memo, useRef, useState, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
 import calendar from '../../content/github-contributions.json'
 
 const { days } = calendar
@@ -54,7 +54,7 @@ export function ContributionCalendar() {
   const active = selected === null ? null : days[selected]
   return (
     <section className="contributions" aria-label="GitHub 贡献日历">
-      <figure style={{ '--calendar-weeks': weeks } as React.CSSProperties}>
+      <figure style={{ '--calendar-weeks': weeks } as CSSProperties}>
         <div className="calendar-months" aria-hidden="true">
           {months.map(month => <span key={month.week} style={{ gridColumn: month.week + 1 }}>{month.label}</span>)}
         </div>
