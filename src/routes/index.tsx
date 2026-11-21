@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { ContributionCalendar } from '../components/ContributionCalendar'
 import { PersonalIntroduction, introductionSummary } from '../components/PersonalIntroduction'
 import { pageHead } from '../lib/seo'
@@ -41,7 +41,11 @@ function Home() {
         </div>
         <div className="profile-calendar">
           <HomeCards />
-          <ContributionCalendar />
+          <ContributionCalendar navigation={<nav className="profile-navigation" aria-label="主导航">
+            <Link to="/posts">文章</Link>
+            <Link to="/about">个人简介</Link>
+            <span aria-disabled="true" title="摄影页面准备中">摄影</span>
+          </nav>} />
         </div>
         <PersonalIntroduction className="home-introduction" />
       </header>

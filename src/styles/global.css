@@ -402,7 +402,9 @@ h1 {
 }
 
 .contributions { --calendar-gap: clamp(1.5px, .27vw, 3px); margin: 16px 0 40px; }
-.contributions figure { position: relative; }
+.contributions figure { position: relative; display: grid; }
+.calendar-months { grid-area: 1 / 1; }
+.calendar-days { grid-area: 2 / 1; }
 .calendar-days, .calendar-months { display: grid; grid-template-columns: repeat(var(--calendar-weeks), minmax(0, 1fr)); column-gap: var(--calendar-gap); }
 .calendar-days { grid-template-rows: repeat(7, auto); grid-auto-flow: column; row-gap: var(--calendar-gap); }
 .calendar-days button {
@@ -417,8 +419,39 @@ h1 {
 .calendar-months { color: var(--ui-text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .calendar-months { margin-block: 6px; }
 .calendar-months span { white-space: nowrap; }
-.calendar-detail { position: absolute; top: calc(100% + 6px); left: 0; z-index: 2; padding: 2px 6px; background: var(--ui-bg-elevated); color: var(--ui-text-primary); font-size: 12px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.calendar-detail { position: absolute; grid-area: 2 / 1; top: calc(100% + 6px); left: 0; z-index: 2; padding: 2px 6px; background: var(--ui-bg-elevated); color: var(--ui-text-primary); font-size: 12px; line-height: 1.5; font-variant-numeric: tabular-nums; }
 .calendar-detail:empty { display: none; }
+.profile-navigation {
+  position: absolute;
+  z-index: 2;
+  grid-area: 2 / 1;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-inline: 12px;
+  border-radius: 8px;
+  background: var(--ui-bg-page);
+  color: var(--ui-text-secondary);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.profile-navigation > * { display: inline-flex; align-items: center; min-height: 44px; }
+.profile-navigation a:is(:hover, :focus-visible) { color: var(--ui-text-primary); text-decoration: underline; text-underline-offset: 6px; }
+.profile-navigation [aria-disabled='true'] { color: var(--ui-text-muted); cursor: default; }
+/* Reveal covered days during keyboard browsing; Tab still reaches the links. */
+.calendar-days:has(:focus-visible) ~ .profile-navigation { opacity: 0; pointer-events: none; }
+@media (max-width: 540px) {
+  .profile-navigation {
+    right: 6px;
+    gap: 12px;
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+  .profile-navigation > * { min-height: 32px; }
+}
 @media (max-width: 767px) {
   :root { --page-gutter: 24px; }
 }
