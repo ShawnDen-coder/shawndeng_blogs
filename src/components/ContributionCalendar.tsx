@@ -1,4 +1,4 @@
-import { memo, useRef, useState, type CSSProperties, type Dispatch, type SetStateAction } from 'react'
+import { memo, useRef, useState, type CSSProperties, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import calendar from '../../content/github-contributions.json'
 
 const { days } = calendar
@@ -49,7 +49,7 @@ const CalendarGrid = memo(function CalendarGrid({ setSelected }: { setSelected: 
   )
 })
 
-export function ContributionCalendar() {
+export function ContributionCalendar({ navigation }: { navigation?: ReactNode }) {
   const [selected, setSelected] = useState<number | null>(null)
   const active = selected === null ? null : days[selected]
   return (
@@ -62,6 +62,7 @@ export function ContributionCalendar() {
         <figcaption className="calendar-detail" aria-live="polite">
           {active ? `${active.date} · ${active.count} 次贡献` : null}
         </figcaption>
+        {navigation}
       </figure>
     </section>
   )
