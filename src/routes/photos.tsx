@@ -81,14 +81,8 @@ function Photos() {
         }}>
         {photo && <>
           <div className="lightbox-controls">
-            <div className="lightbox-control-group">
-              <button type="button" aria-label="上一张照片" onClick={() => move(-1)}><span aria-hidden="true">←</span></button>
-              <button type="button" aria-label="下一张照片" onClick={() => move(1)}><span aria-hidden="true">→</span></button>
-            </div>
-            <div className="lightbox-control-group">
-              <button type="button" aria-label="照片来源" aria-expanded={showInfo} aria-controls="photo-info" onClick={() => setShowInfo(value => !value)}><span aria-hidden="true">ⓘ</span></button>
-              <button ref={closeButton} type="button" aria-label="关闭照片查看器" onClick={close}><span aria-hidden="true">×</span></button>
-            </div>
+            <button type="button" aria-label="照片来源" aria-expanded={showInfo} aria-controls="photo-info" onClick={() => setShowInfo(value => !value)}><span aria-hidden="true">ⓘ</span></button>
+            <button ref={closeButton} type="button" aria-label="关闭照片查看器" onClick={close}><span aria-hidden="true">×</span></button>
           </div>
           <div className="lightbox-stage">
             <img src={assetUrl(`photos/${photo.file}`)} width={photo.width} height={photo.height} alt={photo.title} />

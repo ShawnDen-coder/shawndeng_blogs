@@ -17,8 +17,7 @@
 }
 .photo-lightbox::backdrop { background: rgb(0 0 0 / 70%); }
 .photo-lightbox :focus-visible { outline-color: light-dark(#334f60, #e6e7e7); outline-offset: 2px; }
-.lightbox-controls { display: flex; justify-content: space-between; gap: 8px; margin: -8px -8px 16px; }
-.lightbox-control-group { display: flex; gap: 4px; }
+.lightbox-controls { display: flex; justify-content: flex-end; gap: 4px; margin: -8px -8px 16px; }
 .lightbox-controls button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: inherit; cursor: pointer; font-size: 26px; line-height: 1; }
 .lightbox-controls button:hover { background: light-dark(#e2e2de, #373a3c); }
 .lightbox-stage img { display: block; width: 100%; height: auto; max-height: calc(100dvh - 188px); object-fit: contain; }
