@@ -41,10 +41,6 @@ function Photos() {
 
   return (
     <section className="photos-page">
-      <div className="photos-intro">
-        <h1>摄影</h1>
-        <p>这里暂时展示开放授权的示例照片，个人作品将在日后加入。</p>
-      </div>
       <div className="photo-grid" aria-label="示例照片">
         {photos.map((item, index) => (
           <button className="photo-tile" type="button" key={item.file}
@@ -55,11 +51,6 @@ function Photos() {
           </button>
         ))}
       </div>
-      <details className="photos-credit">
-        <summary>示例照片来源 · CC0</summary>
-        <ul>{photos.map(item => <li key={item.file}><a href={item.source} target="_blank" rel="noreferrer">{item.title}</a> · {item.author}</li>)}</ul>
-        <p>照片来自 Wikimedia Commons，均以 <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0</a> 发布。</p>
-      </details>
       <dialog ref={dialog} className="photo-lightbox" aria-label="照片查看器"
         onCancel={event => { event.preventDefault(); close() }}
         style={photo ? { '--photo-ratio': photo.width / photo.height } as CSSProperties : undefined}
