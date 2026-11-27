@@ -13,6 +13,7 @@ export const Route = createFileRoute('/photos')({
 
 function Photos() {
   const [active, setActive] = useState<number | null>(null)
+  const [showInfo, setShowInfo] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
   const closeButton = useRef<HTMLButtonElement>(null)
   const opener = useRef<HTMLElement | null>(null)
@@ -35,6 +36,7 @@ function Photos() {
     }
   }, [active !== null])
 
+  const close = () => { setShowInfo(false); setActive(null) }
   const move = (direction: number) => setActive(current => current === null ? null : (current + direction + photos.length) % photos.length)
   const photo = active === null ? null : photos[active]
 
@@ -56,12 +58,12 @@ function Photos() {
       </div>
       <p className="photos-credit">示例照片来自 Wikimedia Commons，均以 CC0 发布。点击照片查看作者与来源。</p>
       <dialog ref={dialog} className="photo-lightbox" aria-label="照片查看器"
-        onCancel={event => { event.preventDefault(); setActive(null) }}
+        onCancel={event => { event.preventDefault(); close() }}
         style={photo ? { '--photo-ratio': photo.width / photo.height } as CSSProperties : undefined}
         onClick={event => {
           if (event.target !== event.currentTarget) return
           const bounds = event.currentTarget.getBoundingClientRect()
-          if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) setActive(null)
+          if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) close()
         }}
         onKeyDown={event => {
           if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1) }
@@ -78,13 +80,20 @@ function Photos() {
           if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) move(dx < 0 ? 1 : -1)
         }}>
         {photo && <>
-          <div className="lightbox-top"><span>{active! + 1} / {photos.length}</span><button ref={closeButton} type="button" onClick={() => setActive(null)} aria-label="关闭照片查看器">关闭 <span aria-hidden="true">×</span></button></div>
-          <div className="lightbox-stage">
-            <button className="lightbox-arrow lightbox-previous" type="button" aria-label="上一张照片" onClick={() => move(-1)}>←</button>
-            <img src={assetUrl(`photos/${photo.file}`)} width={photo.width} height={photo.height} alt={photo.title} />
-            <button className="lightbox-arrow lightbox-next" type="button" aria-label="下一张照片" onClick={() => move(1)}>→</button>
+          <div className="lightbox-controls">
+            <div className="lightbox-control-group">
+              <button type="button" aria-label="上一张照片" onClick={() => move(-1)}><span aria-hidden="true">←</span></button>
+              <button type="button" aria-label="下一张照片" onClick={() => move(1)}><span aria-hidden="true">→</span></button>
+            </div>
+            <div className="lightbox-control-group">
+              <button type="button" aria-label="照片来源" aria-expanded={showInfo} aria-controls="photo-info" onClick={() => setShowInfo(value => !value)}><span aria-hidden="true">ⓘ</span></button>
+              <button ref={closeButton} type="button" aria-label="关闭照片查看器" onClick={close}><span aria-hidden="true">×</span></button>
+            </div>
           </div>
-          <div className="lightbox-caption"><div><h2>{photo.title}</h2><p>{photo.description}</p></div><p>摄影：{photo.author} · <a href={photo.source} target="_blank" rel="noreferrer">Wikimedia Commons</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0</a></p></div>
+          <div className="lightbox-stage">
+            <img src={assetUrl(`photos/${photo.file}`)} width={photo.width} height={photo.height} alt={photo.title} />
+          </div>
+          {showInfo && <p id="photo-info" className="lightbox-info">摄影：{photo.author} · <a href={photo.source} target="_blank" rel="noreferrer">Wikimedia Commons</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0</a></p>}
         </>}
       </dialog>
     </section>
