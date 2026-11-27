@@ -7,7 +7,7 @@ import { assetUrl } from '../lib/site'
 import '../styles/photos.css'
 
 export const Route = createFileRoute('/photos')({
-  head: () => pageHead('摄影', '摄影页面与开放授权的示例照片。', '/photos'),
+  head: () => pageHead('摄影', '摄影作品。', '/photos'),
   component: Photos
 })
 
@@ -36,12 +36,12 @@ function Photos() {
   }, [active !== null])
 
   const close = () => setActive(null)
-  const move = (direction: number) => setActive(current => current === null ? null : (current + direction + photos.length) % photos.length)
+  const move = (direction: number) => setActive(current => current === null || photos.length === 0 ? null : (current + direction + photos.length) % photos.length)
   const photo = active === null ? null : photos[active]
 
   return (
     <section className="photos-page">
-      <div className="photo-grid" aria-label="示例照片">
+      <div className="photo-grid" aria-label="摄影作品">
         {photos.map((item, index) => (
           <button className="photo-tile" type="button" key={item.file}
             aria-label={`查看照片：${item.title}`}
