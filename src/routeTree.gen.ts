@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as PhotosRouteImport } from './routes/photos'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ResumeRouteImport } from './routes/resume'
 import { Route as LabMantaRouteImport } from './routes/lab.manta'
@@ -31,6 +32,11 @@ const R404Route = R404RouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PhotosRoute = PhotosRouteImport.update({
+  id: '/photos',
+  path: '/photos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsRoute = ProjectsRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/about': typeof AboutRoute
+  '/photos': typeof PhotosRoute
   '/projects': typeof ProjectsRoute
   '/resume': typeof ResumeRoute
   '/lab/manta': typeof LabMantaRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/about': typeof AboutRoute
+  '/photos': typeof PhotosRoute
   '/projects': typeof ProjectsRoute
   '/resume': typeof ResumeRoute
   '/lab/manta': typeof LabMantaRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/404': typeof R404Route
   '/about': typeof AboutRoute
+  '/photos': typeof PhotosRoute
   '/projects': typeof ProjectsRoute
   '/resume': typeof ResumeRoute
   '/lab/manta': typeof LabMantaRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/about'
+    | '/photos'
     | '/projects'
     | '/resume'
     | '/lab/manta'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/about'
+    | '/photos'
     | '/projects'
     | '/resume'
     | '/lab/manta'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/404'
     | '/about'
+    | '/photos'
     | '/projects'
     | '/resume'
     | '/lab/manta'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
   AboutRoute: typeof AboutRoute
+  PhotosRoute: typeof PhotosRoute
   ProjectsRoute: typeof ProjectsRoute
   ResumeRoute: typeof ResumeRoute
   LabMantaRoute: typeof LabMantaRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/photos': {
+      id: '/photos'
+      path: '/photos'
+      fullPath: '/photos'
+      preLoaderRoute: typeof PhotosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projects': {
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R404Route: R404Route,
   AboutRoute: AboutRoute,
+  PhotosRoute: PhotosRoute,
   ProjectsRoute: ProjectsRoute,
   ResumeRoute: ResumeRoute,
   LabMantaRoute: LabMantaRoute,
