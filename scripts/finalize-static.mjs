@@ -3,10 +3,8 @@ import path from 'node:path'
 import assert from 'node:assert/strict'
 
 const output = 'dist/client'
-const base =
-  process.env.SITE_BASE_PATH ??
-  (process.env.GITHUB_ACTIONS ? '/shawndeng_blogs/' : '/')
-const origin = 'https://shawnden-coder.github.io'
+const base = process.env.SITE_BASE_PATH ?? '/'
+const { origin } = JSON.parse(fs.readFileSync(new URL('../src/lib/site.json', import.meta.url), 'utf8'))
 const url = (route) => `${origin}${base}${route.replace(/^\//, '')}`
 const posts = JSON.parse(fs.readFileSync('src/generated/posts.json', 'utf8'))
 const escape = (value) =>
@@ -38,7 +36,10 @@ function validatePages() {
       html.includes('lang="zh-CN"'),
       `${route}: missing document language`
     )
-    assert.ok(html.includes('rel="canonical"'), `${route}: missing canonical`)
+    assert.ok(
+      html.includes(`rel="canonical" href="${url(route)}"`),
+      `${route}: incorrect canonical URL`
+    )
     assert.ok(!html.includes('href="#/'), `${route}: hash route remains`)
     assert.equal(
       (html.match(/name="description"/g) || []).length,
@@ -80,7 +81,6 @@ for (const [oldSlug, newSlug] of [
   fs.writeFileSync(`${output}/posts/${oldSlug}.html`, redirect)
 }
 fs.copyFileSync(`${output}/404/index.html`, `${output}/404.html`)
-fs.writeFileSync(`${output}/.nojekyll`, '')
 fs.writeFileSync(`${output}/.site-base`, base)
 
 const items = posts

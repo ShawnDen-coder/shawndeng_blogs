@@ -10,9 +10,7 @@ import { cardDataPlugin } from './scripts/card-data-plugin.mjs'
 const posts: Array<{ slug: string }> = JSON.parse(
   fs.readFileSync('src/generated/posts.json', 'utf8')
 )
-const base =
-  process.env.SITE_BASE_PATH ??
-  (process.env.GITHUB_ACTIONS ? '/shawndeng_blogs/' : '/')
+const base = process.env.SITE_BASE_PATH ?? '/'
 
 export default defineConfig({
   base,
