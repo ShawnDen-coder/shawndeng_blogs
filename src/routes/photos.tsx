@@ -13,7 +13,6 @@ export const Route = createFileRoute('/photos')({
 
 function Photos() {
   const [active, setActive] = useState<number | null>(null)
-  const [showInfo, setShowInfo] = useState(false)
   const dialog = useRef<HTMLDialogElement>(null)
   const closeButton = useRef<HTMLButtonElement>(null)
   const opener = useRef<HTMLElement | null>(null)
@@ -36,7 +35,7 @@ function Photos() {
     }
   }, [active !== null])
 
-  const close = () => { setShowInfo(false); setActive(null) }
+  const close = () => setActive(null)
   const move = (direction: number) => setActive(current => current === null ? null : (current + direction + photos.length) % photos.length)
   const photo = active === null ? null : photos[active]
 
@@ -56,7 +55,11 @@ function Photos() {
           </button>
         ))}
       </div>
-      <p className="photos-credit">示例照片来自 Wikimedia Commons，均以 CC0 发布。点击照片查看作者与来源。</p>
+      <details className="photos-credit">
+        <summary>示例照片来源 · CC0</summary>
+        <ul>{photos.map(item => <li key={item.file}><a href={item.source} target="_blank" rel="noreferrer">{item.title}</a> · {item.author}</li>)}</ul>
+        <p>照片来自 Wikimedia Commons，均以 <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0</a> 发布。</p>
+      </details>
       <dialog ref={dialog} className="photo-lightbox" aria-label="照片查看器"
         onCancel={event => { event.preventDefault(); close() }}
         style={photo ? { '--photo-ratio': photo.width / photo.height } as CSSProperties : undefined}
@@ -80,14 +83,10 @@ function Photos() {
           if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) move(dx < 0 ? 1 : -1)
         }}>
         {photo && <>
-          <div className="lightbox-controls">
-            <button type="button" aria-label="照片来源" aria-expanded={showInfo} aria-controls="photo-info" onClick={() => setShowInfo(value => !value)}><span aria-hidden="true">ⓘ</span></button>
-            <button ref={closeButton} type="button" aria-label="关闭照片查看器" onClick={close}><span aria-hidden="true">×</span></button>
-          </div>
-          <div className="lightbox-stage">
-            <img src={assetUrl(`photos/${photo.file}`)} width={photo.width} height={photo.height} alt={photo.title} />
-          </div>
-          {showInfo && <p id="photo-info" className="lightbox-info">摄影：{photo.author} · <a href={photo.source} target="_blank" rel="noreferrer">Wikimedia Commons</a> · <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noreferrer">CC0</a></p>}
+          <img className="lightbox-image" src={assetUrl(`photos/${photo.file}`)} width={photo.width} height={photo.height} alt={photo.title} />
+          <button ref={closeButton} className="lightbox-close" type="button" aria-label="关闭照片查看器" onClick={close}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
         </>}
       </dialog>
     </section>
