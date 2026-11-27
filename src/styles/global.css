@@ -320,6 +320,8 @@ h1 {
   font-size: 14px;
 }
 .home-link:hover { color: var(--ui-text-primary); }
+.home-link--icon { justify-content: center; width: 44px; height: 44px; margin-inline: -10px; border-radius: 6px; }
+.home-link--icon:is(:hover, :focus-visible) { color: var(--ui-text-primary); background: var(--ui-bg-soft); }
 .theme-toggle { justify-content: center; width: 44px; margin-inline: -10px; cursor: pointer; }
 .theme-toggle:hover { color: var(--ui-text-primary); }
 .theme-sun, :root[data-theme='dark'] .theme-moon { display: none; }
