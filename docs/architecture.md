@@ -52,18 +52,29 @@ slug 使用小写字母、数字和连字符，必须唯一。正文使用 Markd
 
 ## 部署
 
-GitHub Actions 构建时默认使用 `/shawndeng_blogs/` 前缀。其他部署环境通过 `SITE_BASE_PATH` 设置，未设置时为 `/`：
+博客通过 Cloudflare Workers Static Assets 发布到 `https://shawndenglabs.com`。`wrangler.json` 为 Worker `shawndeng-blog` 绑定根域名，只上传 `dist/client/`。构建默认使用根路径 `/`。文章可直接通过 `/posts/docker` 等地址访问，未知路径返回自定义 `404.html` 和 HTTP 404。
+
+首次发布前，确认 `shawndenglabs.com` 在目标 Cloudflare 账号内为 active zone。在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 设置以下 repository secrets。
+
+| Secret | 用途 |
+| --- | --- |
+| `CLOUDFLARE_ACCOUNT_ID` | 域名所在 Cloudflare 账号的 ID |
+| `CLOUDFLARE_API_TOKEN` | 在该账号创建或更新 Worker，并在该 zone 绑定自定义域名 |
+
+首次创建 Worker 和后续更新所需权限见 [Workers 权限说明](https://developers.cloudflare.com/workers/authorization/workers/)。域名绑定要求见 [Custom Domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)。
+
+推送到 `main`、每日 02:23 UTC 定时任务或手动运行 GitHub Actions 都会刷新贡献日历、构建、校验并发布。可在本地验证与生产一致的静态路由：
 
 ```sh
-SITE_BASE_PATH=/shawndeng_blogs/ npm run build
-npm run preview
+npm ci
+npm run build
+npx wrangler deploy --dry-run
+npx wrangler dev --local
 ```
 
-预览服务器读取构建时记录的路径前缀，验证真实静态文件，不使用 SPA 回退。生产托管服务也需要支持目录首页与 `404.html`，GitHub Pages 已满足这两个条件。
+`scripts/finalize-static.mjs` 校验预渲染页面与链接，生成 RSS、sitemap、404 和旧文章地址跳转。`src/lib/site.json` 提供页面 canonical、Open Graph 和静态订阅文件共用的正式域名。旧文章地址 `/posts/Docker`、`/posts/K8S` 及其 `.html` 地址会指向新的小写 slug。
 
-`scripts/finalize-static.mjs` 校验预渲染页面与链接前缀，生成 RSS、sitemap、404 和旧文章地址跳转。`/posts/Docker`、`/posts/K8S` 及其旧 `.html` 地址会指向新的小写 slug。
-
-颜色与排版位于 `src/styles/global.css`。英文使用 JetBrains Mono，中文字符范围使用 Sarasa Term SC，字体与许可证本地保存。站点公开域名与 GitHub 入口位于 `src/lib/site.ts`；更换域名时也需同步更新静态导出脚本中的 origin。
+颜色与排版位于 `src/styles/global.css`。英文使用 JetBrains Mono，中文字符范围使用 Sarasa Term SC，字体与许可证本地保存。
 
 ## 主题与布局约定
 

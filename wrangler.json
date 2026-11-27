@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "shawndeng-blog",
+  "compatibility_date": "2026-10-18",
+  "workers_dev": true,
+  "routes": [{ "pattern": "shawndenglabs.com", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist/client",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
