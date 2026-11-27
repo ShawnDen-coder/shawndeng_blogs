@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { photos } from '../lib/photos'
 import { pageHead } from '../lib/seo'
 import { assetUrl } from '../lib/site'
@@ -56,7 +57,12 @@ function Photos() {
       <p className="photos-credit">示例照片来自 Wikimedia Commons，均以 CC0 发布。点击照片查看作者与来源。</p>
       <dialog ref={dialog} className="photo-lightbox" aria-label="照片查看器"
         onCancel={event => { event.preventDefault(); setActive(null) }}
-        onClick={event => { if (event.target === event.currentTarget) setActive(null) }}
+        style={photo ? { '--photo-ratio': photo.width / photo.height } as CSSProperties : undefined}
+        onClick={event => {
+          if (event.target !== event.currentTarget) return
+          const bounds = event.currentTarget.getBoundingClientRect()
+          if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) setActive(null)
+        }}
         onKeyDown={event => {
           if (event.key === 'ArrowLeft') { event.preventDefault(); move(-1) }
           if (event.key === 'ArrowRight') { event.preventDefault(); move(1) }
@@ -73,7 +79,7 @@ function Photos() {
         }}>
         {photo && <>
           <div className="lightbox-top"><span>{active! + 1} / {photos.length}</span><button ref={closeButton} type="button" onClick={() => setActive(null)} aria-label="关闭照片查看器">关闭 <span aria-hidden="true">×</span></button></div>
-          <div className="lightbox-stage" onClick={event => { if (event.target === event.currentTarget) setActive(null) }}>
+          <div className="lightbox-stage">
             <button className="lightbox-arrow lightbox-previous" type="button" aria-label="上一张照片" onClick={() => move(-1)}>←</button>
             <img src={assetUrl(`photos/${photo.file}`)} width={photo.width} height={photo.height} alt={photo.title} />
             <button className="lightbox-arrow lightbox-next" type="button" aria-label="下一张照片" onClick={() => move(1)}>→</button>
