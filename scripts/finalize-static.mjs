@@ -26,6 +26,7 @@ function validatePages() {
     'about',
     'resume',
     'projects',
+    'photos',
     'posts',
     ...posts.map((post) => `posts/${post.slug}`)
   ]) {
@@ -98,6 +99,7 @@ const routes = [
   'about',
   'resume',
   'projects',
+  'photos',
   'posts',
   ...posts.map((post) => `posts/${post.slug}`)
 ]

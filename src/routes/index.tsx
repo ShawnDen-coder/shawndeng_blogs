@@ -44,7 +44,7 @@ function Home() {
           <ContributionCalendar navigation={<nav className="profile-navigation" aria-label="主导航">
             <Link to="/posts">文章</Link>
             <Link to="/about">个人简介</Link>
-            <span aria-disabled="true" title="摄影页面准备中">摄影</span>
+            <Link to="/photos">摄影</Link>
           </nav>} />
         </div>
         <PersonalIntroduction className="home-introduction" />

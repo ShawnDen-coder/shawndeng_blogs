@@ -69,7 +69,7 @@ export default defineConfig({
         crawlLinks: false,
         failOnError: true
       },
-      pages: [{ path: '/lab/manta' }, ...posts.map((post) => ({ path: `/posts/${post.slug}` }))]
+      pages: [{ path: '/lab/manta' }, { path: '/photos' }, ...posts.map((post) => ({ path: `/posts/${post.slug}` }))]
     }),
     react()
   ]
